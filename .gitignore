@@ -33,4 +33,5 @@ override.tf.json
 terraform.rc
 
 # Ignore terraform.tfvars since local data is stored there
-#**/terraform.tfvars
+**/terraform.tfvars
+**/.terraform.lock.hcl
