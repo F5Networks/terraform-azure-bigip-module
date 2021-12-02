@@ -1,11 +1,13 @@
 output "mgmtPublicIP" {
   description = "The actual ip address allocated for the resource."
-  value       = data.azurerm_public_ip.f5vm01mgmtpip.ip_address
+  value       = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+
 }
 
 output "mgmtPublicDNS" {
   description = "fqdn to connect to the first vm provisioned."
-  value       = data.azurerm_public_ip.f5vm01mgmtpip.fqdn
+  value       = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+
 }
 
 
