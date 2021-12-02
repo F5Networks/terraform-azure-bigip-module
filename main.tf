@@ -548,17 +548,18 @@ SETTINGS
 }
 
 # Getting Public IP Assigned to BIGIP
-data "azurerm_public_ip" "f5vm01mgmtpip" {
-  name                = azurerm_public_ip.mgmt_public_ip[0].name
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  depends_on          = [azurerm_virtual_machine.f5vm01, azurerm_virtual_machine_extension.vmext, azurerm_public_ip.mgmt_public_ip[0]]
-}
+# data "azurerm_public_ip" "f5vm01mgmtpip" {
+#   name                = azurerm_public_ip.mgmt_public_ip[0].name
+#   resource_group_name = data.azurerm_resource_group.bigiprg.name
+#   depends_on          = [azurerm_virtual_machine.f5vm01, azurerm_virtual_machine_extension.vmext, azurerm_public_ip.mgmt_public_ip[0]]
+# }
+
 
 data "template_file" "clustermemberDO1" {
   count    = local.total_nics == 1 ? 1 : 0
   template = file("${path.module}/onboard_do_1nic.tpl")
   vars = {
-    hostname      = data.azurerm_public_ip.f5vm01mgmtpip.fqdn
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip.fqdn : azurerm_network_interface.mgmt_nic.private_ip_address
     name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
@@ -569,7 +570,7 @@ data "template_file" "clustermemberDO2" {
   count    = local.total_nics == 2 ? 1 : 0
   template = file("${path.module}/onboard_do_2nic.tpl")
   vars = {
-    hostname      = data.azurerm_public_ip.f5vm01mgmtpip.fqdn
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip.fqdn : azurerm_network_interface.mgmt_nic.private_ip_address
     name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
@@ -584,7 +585,7 @@ data "template_file" "clustermemberDO3" {
   count    = local.total_nics == 3 ? 1 : 0
   template = file("${path.module}/onboard_do_3nic.tpl")
   vars = {
-    hostname      = data.azurerm_public_ip.f5vm01mgmtpip.fqdn
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip.fqdn : azurerm_network_interface.mgmt_nic.private_ip_address
     name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
