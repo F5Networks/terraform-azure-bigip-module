@@ -1,4 +1,4 @@
-## Deploys BIG-IP in Azure Cloud
+# Deploys BIG-IP in Azure Cloud
 
 This Terraform module deploys N-nic F5 BIG-IP in Azure cloud,and with module count feature we can also deploy multiple instances of BIG-IP.
 
@@ -6,7 +6,7 @@ This Terraform module deploys N-nic F5 BIG-IP in Azure cloud,and with module cou
 
 This module is supported from Terraform 0.13 version onwards.
 
-Below templates are tested and worked in the following version 
+Below templates are tested and worked in the following version
 
 Terraform v0.14.0
 
@@ -52,10 +52,10 @@ This module is supported in the following bigip and terraform version
 
 This template uses PayGo BIG-IP image for the deployment (as default). If you would like to use BYOL licenses, then these following steps are needed:
 
-1. Find available images/versions with *BYOL* in SKU name using Azure CLI:
++ Find available images/versions with *BYOL* in SKU name using Azure CLI:
 
-    ```bash
-    az vm image list -f BIG-IP --all
+    ```sh
+    > az vm image list -f BIG-IP --all
 
             # example output...
 
@@ -68,7 +68,7 @@ This template uses PayGo BIG-IP image for the deployment (as default). If you wo
             },
     ```
 
-2. In the `variables.tf`, modify `image_name` and `product_name` with the SKU and offer from AZ CLI results
++ In the `variables.tf`, modify `image_name` and `product_name` with the SKU and offer from AZ CLI results
 
     ```hcl
             # BIGIP Image
@@ -76,7 +76,7 @@ This template uses PayGo BIG-IP image for the deployment (as default). If you wo
             variable image_name { default = "f5-big-ltm-2slot-byol" }
     ```
 
-3. Add the corresponding license key in DO declaration( Declarative Onboarding ), this DO can be added in custom run-time-int script ( as given in examples section ) or POST a Declarative Onboarding declaration as given in url. 
++ Add the corresponding license key in DO declaration( Declarative Onboarding ), this DO can be added in custom run-time-int script ( as given in examples section ) or POST a Declarative Onboarding declaration as given in url.
 (<https://clouddocs.f5.com/products/extensions/f5-declarative-onboarding/latest/bigip-examples.html#standalone-declaration> )
 
     ```shell
@@ -97,7 +97,7 @@ This template uses PayGo BIG-IP image for the deployment (as default). If you wo
 
 ```hcl
 module bigip {
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-3nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true, "private_ip_primary" =  ""}]
@@ -112,10 +112,9 @@ module bigip {
 }
 ```
 
-
 ## Example Usage
 
-We have provided some common deployment [examples](https://github.com/f5devcentral/terraform-azure-bigip-module/tree/master/examples) 
++ We have provided some common deployment [examples](https://github.com/F5Networks/terraform-azure-bigip-module/tree/main/examples)
 
 !> **Note:** There should be one to one mapping between subnet_ids and securitygroup_ids (for example if we have 2 or more external subnet_ids,we have to give same number of external securitygroup_ids to module)
 
@@ -123,24 +122,22 @@ We have provided some common deployment [examples](https://github.com/f5devcentr
 
 !> **Note:** With Static private ip allocation we can assign primary and secondary private ips for external interfaces, whereas primary private ip for management and internal interfaces.
 
-!> **WARNING**
+~> **WARNING** If it is static private ip allocation we can't use module count,as same private ips will be tried to allocate for multiple bigip instances based on module count.
 
-+ If it is static private ip allocation we can't use module count,as same private ips will be tried to allocate for multiple bigip instances based on module count.
-
-+ With Dynamic private ip allocation,we have to pass null value to primary/secondary private ip declaration and module count will be supported.
+~> **WARNING** With Dynamic private ip allocation,we have to pass null value to primary/secondary private ip declaration and module count will be supported.
 
 !> **Note:** Sometimes it is observed that the given static primary and secondary private ips may get exchanged. This is the limitation present in aws.
 
-~>**NOTE:** This Module uses basic [DO](https://raw.githubusercontent.com/f5devcentral/terraform-azure-bigip-module/master/config/onboard_do.json) config to set the Users and Passwords as part of runtime-init, it does not config VLANS/SelfIPs and other configuration.
+~>**NOTE:** This Module uses basic [DO](https://github.com/F5Networks/terraform-azure-bigip-module/blob/main/config/onboard_do.json) config to set the Users and Passwords as part of runtime-init, it does not config VLANS/SelfIPs and other configuration.
 
-#### Below example snippets show how this module is called. ( Dynamic private ip allocation )
+### Below example snippets show how this module is called. ( Dynamic private ip allocation )
 
 ```hcl
 #
 #Example 1-NIC Deployment Module usage
 #
 module bigip {
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-1nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true,"private_ip_primary" =  ""}]
@@ -153,7 +150,7 @@ module bigip {
 #Example 2-NIC Deployment Module usage
 #
 module bigip {
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-2nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true, "private_ip_primary" =  ""}]
@@ -168,7 +165,7 @@ module bigip {
 #Example 3-NIC Deployment  Module usage 
 #
 module bigip {
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-3nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true, "private_ip_primary" =  ""}]
@@ -180,11 +177,12 @@ module bigip {
   availabilityZones           =  var.availabilityZones
   availabilityZones_public_ip = var.availabilityZones_public_ip
 }
+
 #
 #Example 4-NIC Deployment  Module usage(with 2 external public interfaces,one management and internal interface.There should be one to one mapping between subnet_ids and securitygroupids)
 #
 module bigip {
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-4nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true, "private_ip_primary" =  ""}]
@@ -202,7 +200,7 @@ module bigip {
 #
 module bigip {
   count                       = 2
-  source                      = "../../"
+  source                      = "F5Networks/bigip-module/azure"
   prefix                      = "bigip-azure-1nic"
   resource_group_name         = "testbigip"
   mgmt_subnet_ids             = [{"subnet_id" = "subnet_id_mgmt" , "public_ip" = true,"private_ip_primary" =  ""}]
@@ -223,7 +221,7 @@ module bigip {
 #Example 3-NIC Deployment with static private ip allocation
 #
 module bigip {
-  source                     = "../../"
+  source                     = "F5Networks/bigip-module/azure"
   prefix                     = format("%s-3nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
   mgmt_subnet_ids            = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" =  "10.2.1.5"}]
@@ -242,13 +240,13 @@ module bigip {
 
 These variables must be set in the module block when using this module.
 
-| Name | Description | Type | 
+| Name | Description | Type |
 |------|-------------|------|
 | prefix | This value is inserted in the beginning of each Azure object. Note: requires alpha-numeric without special character | `string` |
 | resource\_group\_name | The name of the resource group in which the resources will be created | `string` |
 | mgmt\_subnet\_ids | Map with Subnet-id and public_ip as keys for the management subnet | `List of Maps` |
 | mgmt\_securitygroup\_ids | securitygroup\_ids for the management interface | `List` |
-| f5\_ssh\_publickey | public key to be used for ssh access to the VM,managing key is out of band module, user can reference this key from [azurerm_ssh_public_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/ssh_public_key) | `string` |  | 
+| f5\_ssh\_publickey | public key to be used for ssh access to the VM,managing key is out of band module, user can reference this key from [azurerm_ssh_public_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/ssh_public_key) | `string` |  |
 | availabilityZones | availabilityZones | `List` |
 | availabilityZones_public_ip | availabilityZones_public_ip | `string` |
 
@@ -263,14 +261,14 @@ These variables have default values and don't have to be set to use this module.
 | f5\_instance\_type | Specifies the size of the virtual machine | `string` | Standard\_DS3\_v2|
 | f5\_image\_name | 5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select. Important: If intending to provision multiple modules, ensure the appropriate value is selected, such as AllTwoBootLocations or AllOneBootLocation | `string` | f5-bigip-virtual-edition-200m-best-hourly |
 | f5\_version | It is set to default to use the latest software | `string` | latest |
-| f5\_product\_name | Azure BIG-IP VE Offer | `string` | f5-big-ip-best | 
+| f5\_product\_name | Azure BIG-IP VE Offer | `string` | f5-big-ip-best |
 | storage\_account\_type | Defines the type of storage account to be created. Valid options are Standard\_LRS, Standard\_ZRS, Standard\_GRS, Standard\_RAGRS, Premium\_LRS | `string` | Standard\_LRS |
-| enable\_accelerated\_networking | Enable accelerated networking on Network interface | `bool` | FALSE | 
-| enable\_ssh\_key | Enable ssh key authentication in Linux virtual Machine | `bool` | TRUE | 
-| DO_URL | URL to download the BIG-IP Declarative Onboarding module | `string` | latest | 
-| AS3_URL | URL to download the BIG-IP Application Service Extension 3 (AS3) module | `string` | latest | 
-| TS_URL | URL to download the BIG-IP Telemetry Streaming module | `string` | latest | 
-| FAST_URL | URL to download the BIG-IP FAST module | `string` | latest | 
+| enable\_accelerated\_networking | Enable accelerated networking on Network interface | `bool` | FALSE |
+| enable\_ssh\_key | Enable ssh key authentication in Linux virtual Machine | `bool` | TRUE |
+| DO_URL | URL to download the BIG-IP Declarative Onboarding module | `string` | latest |
+| AS3_URL | URL to download the BIG-IP Application Service Extension 3 (AS3) module | `string` | latest |
+| TS_URL | URL to download the BIG-IP Telemetry Streaming module | `string` | latest |
+| FAST_URL | URL to download the BIG-IP FAST module | `string` | latest |
 | CFE_URL | URL to download the BIG-IP Cloud Failover Extension module | `string` | latest |
 | INIT_URL | URL to download the BIG-IP runtime init module | `string` | latest |
 | libs\_dir | Directory on the BIG-IP to download the A&O Toolchain into | `string` | /config/cloud/azure/node_modules |
@@ -283,8 +281,8 @@ These variables have default values and don't have to be set to use this module.
 | internal\_subnet\_ids | List of maps of subnetids of the virtual network where the virtual machines will reside | `List of Maps` | [{ "subnet_id" = null, "public_ip" = null,"private_ip_primary" = "" }] |
 | external\_securitygroup\_ids | List of network Security Groupids for external network | `List` | [] |
 | internal\_securitygroup\_ids | List of network Security Groupids for internal network | `List` | [] |
-| custom\_user\_data | Provide a custom bash script or cloud-init script the BIG-IP will run on creation | string  |   null   |
-| tags | `key:value` tags to apply to resources built by the module | map  |   {}   |
+| custom\_user\_data | Provide a custom bash script or cloud-init script the BIG-IP will run on creation | `string`  |   null   |
+| tags | `key:value` tags to apply to resources built by the module | `map`  |   {}   |
 
 #### Output Variables
 
@@ -341,7 +339,7 @@ This repository is community-supported. Follow instructions below on how to rais
 
 ### Filing Issues and Getting Help
 
-If you come across a bug or other issue, use [GitHub Issues](https://github.com/f5devcentral/terraform-azure-bigip-module/issues) to submit an issue for our team.  You can also see the current known issues on that page, which are tagged with a purple Known Issue label.
+If you come across a bug or other issue, use [GitHub Issues](https://github.com/F5Networks/terraform-azure-bigip-module/issues) to submit an issue for our team.  You can also see the current known issues on that page, which are tagged with a purple Known Issue label.
 
 ## Copyright
 
