@@ -71,7 +71,7 @@ locals {
   mgmt_private_security_id = [
     for i in local.external_private_index : local.bigip_map["mgmt_securitygroup_ids"][i]
   ]
-    
+
   external_public_subnet_id = [
     for subnet in local.bigip_map["external_subnet_ids"] :
     subnet["subnet_id"]
