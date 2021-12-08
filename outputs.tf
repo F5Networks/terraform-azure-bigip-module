@@ -1,6 +1,6 @@
 output "mgmtPublicIP" {
   description = "The actual ip address allocated for the resource."
-  value       = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+  value       = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].ip_address : azurerm_network_interface.mgmt_nic[0].private_ip_address
 
 }
 
