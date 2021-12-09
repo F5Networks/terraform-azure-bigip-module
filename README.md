@@ -283,6 +283,7 @@ These variables have default values and don't have to be set to use this module.
 | internal\_securitygroup\_ids | List of network Security Groupids for internal network | `List` | [] |
 | custom\_user\_data | Provide a custom bash script or cloud-init script the BIG-IP will run on creation | `string`  |   null   |
 | tags | `key:value` tags to apply to resources built by the module | `map`  |   {}   |
+| sleep_time | The number of seconds/minutes of delay to build into creation of BIG-IP VMs | `string` | 300s |
 
 #### Output Variables
 

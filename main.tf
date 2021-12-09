@@ -537,14 +537,16 @@ resource "azurerm_virtual_machine_extension" "vmext" {
   publisher            = "Microsoft.OSTCExtensions"
   type                 = "CustomScriptForLinux"
   type_handler_version = "1.2"
-  provisioner "local-exec" {
-    command = "sleep 240"
-  }
-  settings = <<SETTINGS
+  settings             = <<SETTINGS
     {
       "commandToExecute": "bash /var/lib/waagent/CustomData"
     }
 SETTINGS
+}
+
+resource "time_sleep" "wait_for_azurerm_virtual_machine_f5vm" {
+  depends_on      = [azurerm_virtual_machine_extension.vmext]
+  create_duration = var.sleep_time
 }
 
 # Getting Public IP Assigned to BIGIP
