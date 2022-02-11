@@ -91,6 +91,21 @@ variable "storage_account_type" {
   default     = "Standard_LRS"
 }
 
+variable "os_disk_size_gb" {
+  description = "(Optional) The Size of the Internal OS Disk in GB, if you wish to vary from the size used in the image this Virtual Machine is sourced from."
+  default = null
+}
+
+variable "disk_encryption_set_id" {
+  description = "(Optional) The ID of the Disk Encryption Set which should be used to Encrypt the OS Disk."
+  default = null
+}
+
+variable "encryption_at_host_enabled" {
+  description = " (Optional) Should all of the disks (including the temp disk) attached to this Virtual Machine be encrypted by enabling Encryption at Host?"
+  default = false
+}
+
 variable "enable_accelerated_networking" {
   type        = bool
   description = "(Optional) Enable accelerated networking on Network interface"
