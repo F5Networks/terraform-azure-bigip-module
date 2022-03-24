@@ -67,5 +67,5 @@ output "private_addresses" {
 }
 
 output "bigip_instance_ids" {
-  value = concat(azurerm_virtual_machine.f5vm01.*.id)[0]
+  value = concat(azurerm_linux_virtual_machine.f5vm01.*.id)[0]
 }

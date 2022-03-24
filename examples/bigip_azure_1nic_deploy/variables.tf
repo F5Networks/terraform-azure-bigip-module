@@ -12,10 +12,9 @@ variable "cidr" {
   default     = "10.2.0.0/16"
 }
 
-variable "availabilityZones" {
-  description = "If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the numbers of the existing Availability Zone you want to use."
-  type        = list(any)
-  default     = [1]
+variable "availability_zone" {
+  description = "If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the number of the existing Availability Zone you want to use."
+  default     = 1
 }
 
 variable "availabilityZones_public_ip" {
