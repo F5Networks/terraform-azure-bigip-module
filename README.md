@@ -130,6 +130,8 @@ module bigip {
 
 ~>**NOTE:** This Module uses basic [DO](https://github.com/F5Networks/terraform-azure-bigip-module/blob/main/config/onboard_do.json) config to set the Users and Passwords as part of runtime-init, it does not config VLANS/SelfIPs and other configuration.
 
+~>**NOTE:** If you are using custom ATC tools, don't change name of ATC tools rpm file( ex: f5-declarative-onboarding-xxxx.noarch.rpm,f5-appsvcs-xxx.noarch.rpm)
+
 ### Below example snippets show how this module is called. ( Dynamic private ip allocation )
 
 ```hcl
@@ -265,12 +267,12 @@ These variables have default values and don't have to be set to use this module.
 | storage\_account\_type | Defines the type of storage account to be created. Valid options are Standard\_LRS, Standard\_ZRS, Standard\_GRS, Standard\_RAGRS, Premium\_LRS | `string` | Standard\_LRS |
 | enable\_accelerated\_networking | Enable accelerated networking on Network interface | `bool` | FALSE |
 | enable\_ssh\_key | Enable ssh key authentication in Linux virtual Machine | `bool` | TRUE |
-| DO_URL | URL to download the BIG-IP Declarative Onboarding module | `string` | latest |
-| AS3_URL | URL to download the BIG-IP Application Service Extension 3 (AS3) module | `string` | latest |
-| TS_URL | URL to download the BIG-IP Telemetry Streaming module | `string` | latest |
-| FAST_URL | URL to download the BIG-IP FAST module | `string` | latest |
-| CFE_URL | URL to download the BIG-IP Cloud Failover Extension module | `string` | latest |
-| INIT_URL | URL to download the BIG-IP runtime init module | `string` | latest |
+| DO_URL | URL to download the BIG-IP Declarative Onboarding module | `string` | `latest` Note: don't change name of ATC tools rpm file|
+| AS3_URL | URL to download the BIG-IP Application Service Extension 3 (AS3) module | `string` | `latest` Note: don't change name of ATC tools rpm file |
+| TS_URL | URL to download the BIG-IP Telemetry Streaming module | `string` | `latest` Note: don't change name of ATC tools rpm file |
+| FAST_URL | URL to download the BIG-IP FAST module | `string` | `latest` Note: don't change name of ATC tools rpm file |
+| CFE_URL | URL to download the BIG-IP Cloud Failover Extension module | `string` | `latest` Note: don't change name of ATC tools rpm file |
+| INIT_URL | URL to download the BIG-IP runtime init module | `string` | `latest` Note: don't change name of ATC tools rpm file |
 | libs\_dir | Directory on the BIG-IP to download the A&O Toolchain into | `string` | /config/cloud/azure/node_modules |
 | onboard\_log | Directory on the BIG-IP to store the cloud-init logs | `string` | /var/log/startup-script.log |
 | azure\_secret\_rg | The name of the resource group in which the Azure Key Vault exists | `string` | "" |

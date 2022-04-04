@@ -73,8 +73,8 @@ variable "f5_instance_type" {
 }
 
 variable "f5_image_name" {
-  type    = string
-  default = "f5-bigip-virtual-edition-200m-best-hourly"
+  type        = string
+  default     = "f5-bigip-virtual-edition-200m-best-hourly"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
@@ -92,8 +92,8 @@ f5_image_name is equivalent to the "sku" returned.
 EOD  
 }
 variable "f5_version" {
-  type    = string
-  default = "latest"
+  type        = string
+  default     = "latest"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
@@ -112,8 +112,8 @@ EOD
 }
 
 variable "f5_product_name" {
-  type    = string
-  default = "f5-big-ip-best"
+  type        = string
+  default     = "f5-big-ip-best"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
