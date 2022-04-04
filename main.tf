@@ -274,11 +274,11 @@ data "template_file" "init_file" {
     TS_URL                      = var.TS_URL
     CFE_URL                     = var.CFE_URL
     FAST_URL                    = var.FAST_URL,
-    DO_VER                      = split("/", var.DO_URL)[7]
-    AS3_VER                     = split("/", var.AS3_URL)[7]
-    TS_VER                      = split("/", var.TS_URL)[7]
-    CFE_VER                     = split("/", var.CFE_URL)[7]
-    FAST_VER                    = split("/", var.FAST_URL)[7]
+    DO_VER                      = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+    AS3_VER                     = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+    TS_VER                      = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+    CFE_VER                     = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+    FAST_VER                    = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
     vault_url                   = var.az_key_vault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
     secret_id                   = var.az_key_vault_authentication ? var.azure_keyvault_secret_name : ""
     az_key_vault_authentication = var.az_key_vault_authentication
