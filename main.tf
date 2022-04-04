@@ -463,65 +463,59 @@ resource "azurerm_network_interface_security_group_association" "internal_securi
 }
 
 
+
 # Create F5 BIGIP1
-resource "azurerm_virtual_machine" "f5vm01" {
-  name                         = "${local.instance_prefix}-f5vm01"
-  location                     = data.azurerm_resource_group.bigiprg.location
-  resource_group_name          = data.azurerm_resource_group.bigiprg.name
-  primary_network_interface_id = element(azurerm_network_interface.mgmt_nic.*.id, 0)
-  network_interface_ids        = concat(azurerm_network_interface.mgmt_nic.*.id, azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id, azurerm_network_interface.internal_nic.*.id)
-  vm_size                      = var.f5_instance_type
+resource "azurerm_linux_virtual_machine" "f5vm01" {
+  name                            = "${local.instance_prefix}-f5vm01"
+  location                        = data.azurerm_resource_group.bigiprg.location
+  resource_group_name             = data.azurerm_resource_group.bigiprg.name
+  network_interface_ids           = concat(azurerm_network_interface.mgmt_nic.*.id, azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id, azurerm_network_interface.internal_nic.*.id)
+  size                            = var.f5_instance_type
+  disable_password_authentication = var.enable_ssh_key
+  computer_name                   = "${local.instance_prefix}-f5vm01"
+  admin_username                  = var.f5_username
+  admin_password                  = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
+  custom_data                     = base64encode(coalesce(var.custom_user_data, data.template_file.init_file.rendered))
 
-  # Uncomment this line to delete the OS disk automatically when deleting the VM
-  delete_os_disk_on_termination = true
 
 
-  # Uncomment this line to delete the data disks automatically when deleting the VM
-  delete_data_disks_on_termination = true
 
-  storage_image_reference {
-    publisher = "f5-networks"
+
+
+
+
+
+  source_image_reference {
     offer     = var.f5_product_name
+    publisher = "f5-networks"
     sku       = var.f5_image_name
     version   = var.f5_version
   }
 
-  storage_os_disk {
-    name              = "${local.instance_prefix}-osdisk-f5vm01"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = var.storage_account_type
+  os_disk {
+    caching                   = "ReadWrite"
+    disk_size_gb              = 84
+    name                      = "${local.instance_prefix}-osdisk-f5vm01"
+    storage_account_type      = var.storage_account_type
+    write_accelerator_enabled = false
   }
 
-  os_profile {
-    computer_name  = "${local.instance_prefix}-f5vm01"
-    admin_username = var.f5_username
-    admin_password = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
-    //custom_data    = var.az_key_vault_authentication ? data.template_file.init_file1[0].rendered : data.template_file.init_file[0].rendered
-    custom_data = coalesce(var.custom_user_data, data.template_file.init_file.rendered)
-
-  }
-  os_profile_linux_config {
-    disable_password_authentication = var.enable_ssh_key
-
-    dynamic "ssh_keys" {
-      for_each = var.enable_ssh_key ? [var.f5_ssh_publickey] : []
-      content {
-        path     = "/home/${var.f5_username}/.ssh/authorized_keys"
-        key_data = var.f5_ssh_publickey
-      }
-    }
+  admin_ssh_key {
+    public_key = var.f5_ssh_publickey
+    username   = "bigipuser"
   }
   plan {
     name      = var.f5_image_name
-    publisher = "f5-networks"
     product   = var.f5_product_name
+    publisher = "f5-networks"
   }
-  zones = var.availabilityZones
+  zone = var.availability_zone
+
   tags = merge(local.tags, {
     Name = format("%s-f5vm01", local.instance_prefix)
     }
   )
+
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.user_identity.id]
@@ -532,8 +526,8 @@ resource "azurerm_virtual_machine" "f5vm01" {
 ## ..:: Run Startup Script ::..
 resource "azurerm_virtual_machine_extension" "vmext" {
   name                 = "${local.instance_prefix}-vmext1"
-  depends_on           = [azurerm_virtual_machine.f5vm01]
-  virtual_machine_id   = azurerm_virtual_machine.f5vm01.id
+  depends_on           = [azurerm_linux_virtual_machine.f5vm01]
+  virtual_machine_id   = azurerm_linux_virtual_machine.f5vm01.id
   publisher            = "Microsoft.OSTCExtensions"
   type                 = "CustomScriptForLinux"
   type_handler_version = "1.2"
