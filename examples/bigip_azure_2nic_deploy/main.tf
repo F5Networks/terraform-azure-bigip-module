@@ -38,7 +38,7 @@ module "bigip" {
   mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
   external_subnet_ids         = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true, "private_ip_primary" = "", "private_ip_secondary" = "" }]
   external_securitygroup_ids  = [module.external-network-security-group-public.network_security_group_id]
-  availabilityZones           = var.availabilityZones
+  availability_zone           = var.availability_zone
   availabilityZones_public_ip = var.availabilityZones_public_ip
 }
 
@@ -172,9 +172,3 @@ resource "azurerm_network_security_rule" "external_allow_ssh" {
   network_security_group_name = format("%s-external-public-nsg-%s", var.prefix, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
-
-
-
-
-
-

@@ -35,7 +35,7 @@ module "bigip" {
   f5_ssh_publickey            = azurerm_ssh_public_key.f5_key.public_key
   mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = false, "private_ip_primary" = "" }]
   mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
-  availabilityZones           = var.availabilityZones
+  availability_zone           = var.availability_zone
   availabilityZones_public_ip = var.availabilityZones_public_ip
 }
 
