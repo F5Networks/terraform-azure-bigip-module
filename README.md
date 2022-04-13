@@ -15,6 +15,8 @@ Terraform v0.14.0
 + provider registry.terraform.io/hashicorp/random v2.3.0
 + provider registry.terraform.io/hashicorp/template v2.1.2
 
+!> **Note:** bigip-module v1.2.0 Requires azurerm > 3.0 version
+
 ## Releases and Versioning
 
 This module is supported in the following bigip and terraform version
