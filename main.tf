@@ -477,14 +477,6 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
   admin_password                  = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
   custom_data                     = base64encode(coalesce(var.custom_user_data, data.template_file.init_file.rendered))
 
-
-
-
-
-
-
-
-
   source_image_reference {
     offer     = var.f5_product_name
     publisher = "f5-networks"
@@ -502,7 +494,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
 
   admin_ssh_key {
     public_key = var.f5_ssh_publickey
-    username   = "bigipuser"
+    username   = var.f5_username
   }
   plan {
     name      = var.f5_image_name
