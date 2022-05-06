@@ -2,6 +2,9 @@
 
 This Terraform module deploys N-nic F5 BIG-IP in Azure cloud,and with module count feature we can also deploy multiple instances of BIG-IP.
 
+## CVE-2020-5902
+"Warning: due to [CVE-2020-5902](https://support.f5.com/csp/article/K52145254), do not use templates unless using customImage parameter. Updated images are pending publication to Marketplace. Please see [CVE-2020-5902](https://support.f5.com/csp/article/K52145254) and Cloud Provider for latest updates.
+
 ## Prerequisites
 
 This module is supported from Terraform 0.13 version onwards.
