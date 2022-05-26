@@ -31,6 +31,12 @@ runtime_parameters:
   - name: USER_NAME
     type: static
     value: ${bigip_username}
+  - name: HOST_NAME
+    type: metadata
+    metadataProvider:
+      environment: azure
+      type: compute
+      field: name
   - name: SSH_KEYS
     type: static
     value: "${ssh_keypair}"
