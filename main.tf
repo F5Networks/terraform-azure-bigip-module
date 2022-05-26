@@ -520,12 +520,12 @@ resource "azurerm_virtual_machine_extension" "vmext" {
   name                 = "${local.instance_prefix}-vmext1"
   depends_on           = [azurerm_linux_virtual_machine.f5vm01]
   virtual_machine_id   = azurerm_linux_virtual_machine.f5vm01.id
-  publisher            = "Microsoft.OSTCExtensions"
-  type                 = "CustomScriptForLinux"
-  type_handler_version = "1.2"
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.0"
   settings             = <<SETTINGS
     {
-      "commandToExecute": "bash /var/lib/waagent/CustomData"
+      "commandToExecute": "bash /var/lib/waagent/CustomData; exit 0;"
     }
 SETTINGS
 }
