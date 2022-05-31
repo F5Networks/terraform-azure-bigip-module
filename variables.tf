@@ -74,7 +74,7 @@ variable "f5_instance_type" {
 
 variable "f5_image_name" {
   type        = string
-  default     = "f5-bigip-virtual-edition-200m-best-hourly"
+  default     = "f5-big-best-plus-hourly-25mbps"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
