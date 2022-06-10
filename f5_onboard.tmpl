@@ -18,9 +18,10 @@ exec 1>$npipe
 exec 2>&1
 
 mkdir -p /config/cloud
-  
-curl -o /config/cloud/do_w_admin.json -s --fail --retry 60 -m 10 -L https://raw.githubusercontent.com/F5Networks/terraform-azure-bigip-module/main/config/onboard_do.json
 
+MODULE_VERSION=1.2.2
+  
+curl -o /config/cloud/do_w_admin.json -s --fail --retry 60 -m 10 -L https://raw.githubusercontent.com/F5Networks/terraform-azure-bigip-module/v$MODULE_VERSION/config/onboard_do_new.json
 
 ### write_files:
 # Download or Render BIG-IP Runtime Init Config 
