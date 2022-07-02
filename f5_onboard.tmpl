@@ -60,10 +60,6 @@ else
   - name: ADMIN_PASS
     type: static
     value: ${bigip_password}
-EOF
-fi
-
-cat << 'EOF' >> /config/cloud/runtime-init-conf.yaml
 pre_onboard_enabled:
   - name: provision_rest
     type: inline
@@ -71,6 +67,12 @@ pre_onboard_enabled:
       - /usr/bin/setdb provision.extramb 500
       - /usr/bin/setdb restjavad.useextramb true
       - /usr/bin/setdb setup.run false
+EOF
+fi
+
+cat /config/cloud/runtime-init-conf.yaml > /config/cloud/runtime-init-conf-backup.yaml
+
+cat << 'EOF' >> /config/cloud/runtime-init-conf.yaml
 extension_packages:
   install_operations:
     - extensionType: do
@@ -107,7 +109,7 @@ extension_services:
           myDns:
             class: DNS
             nameServers:
-              - 169.254.169.253
+              - 168.63.129.16
           admin:
             class: User
             partitionAccess:
@@ -130,6 +132,51 @@ extension_services:
             userType: regular
 post_onboard_enabled: []
 EOF
+
+cat << 'EOF' >> /config/cloud/runtime-init-conf-backup.yaml
+extension_services:
+  service_operations:
+    - extensionType: do
+      type: inline
+      value:
+        schemaVersion: 1.0.0
+        class: Device
+        async: true
+        Common:
+          class: Tenant
+          hostname: '{{{HOST_NAME}}}.com'
+          myNtp:
+            class: NTP
+            servers:
+              - 0.pool.ntp.org
+            timezone: UTC
+          myDns:
+            class: DNS
+            nameServers:
+              - 168.63.129.16
+          admin:
+            class: User
+            partitionAccess:
+              all-partitions:
+                role: admin
+            password: '{{{ADMIN_PASS}}}'
+            shell: bash
+            keys:
+              - '{{{SSH_KEYS}}}'
+            userType: regular
+          '{{{USER_NAME}}}':
+            class: User
+            partitionAccess:
+              all-partitions:
+                role: admin
+            password: '{{{ADMIN_PASS}}}'
+            shell: bash
+            keys:
+              - '{{{SSH_KEYS}}}'
+            userType: regular
+post_onboard_enabled: []
+EOF
+
 # # Download
 #PACKAGE_URL='https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.1.0/dist/f5-bigip-runtime-init-1.1.0-1.gz.run'
 #PACKAGE_URL='https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.2.0/dist/f5-bigip-runtime-init-1.2.0-1.gz.run'
@@ -140,3 +187,5 @@ done
 bash /var/config/rest/downloads/f5-bigip-runtime-init-1.1.0-1.gz.run -- '--cloud azure'
 # Run
 f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf.yaml
+sleep 5
+f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf-backup.yaml

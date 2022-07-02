@@ -252,7 +252,6 @@ These variables must be set in the module block when using this module.
 | resource\_group\_name | The name of the resource group in which the resources will be created | `string` |
 | mgmt\_subnet\_ids | Map with Subnet-id and public_ip as keys for the management subnet | `List of Maps` |
 | mgmt\_securitygroup\_ids | securitygroup\_ids for the management interface | `List` |
-| f5\_ssh\_publickey | public key to be used for ssh access to the VM,managing key is out of band module, user can reference this key from [azurerm_ssh_public_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/ssh_public_key) | `string` |  |
 | availabilityZones | availabilityZones | `List` |
 | availabilityZones_public_ip | availabilityZones_public_ip | `string` |
 
@@ -271,6 +270,7 @@ These variables have default values and don't have to be set to use this module.
 | storage\_account\_type | Defines the type of storage account to be created. Valid options are Standard\_LRS, Standard\_ZRS, Standard\_GRS, Standard\_RAGRS, Premium\_LRS | `string` | Standard\_LRS |
 | enable\_accelerated\_networking | Enable accelerated networking on Network interface | `bool` | FALSE |
 | enable\_ssh\_key | Enable ssh key authentication in Linux virtual Machine | `bool` | TRUE |
+| f5\_ssh\_publickey | public key to be used for ssh access to the VM,managing key is out of band module, user can reference this key from [azurerm_ssh_public_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/ssh_public_key) | `string` | It should be used along with `enable_ssh_key` set `true` |
 | DO_URL | URL to download the BIG-IP Declarative Onboarding module | `string` | `latest` Note: don't change name of ATC tools rpm file|
 | AS3_URL | URL to download the BIG-IP Application Service Extension 3 (AS3) module | `string` | `latest` Note: don't change name of ATC tools rpm file |
 | TS_URL | URL to download the BIG-IP Telemetry Streaming module | `string` | `latest` Note: don't change name of ATC tools rpm file |
