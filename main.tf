@@ -242,29 +242,6 @@ resource "random_string" "password" {
   special     = false
 }
 
-data "template_file" "init_file1" {
-  count    = var.az_key_vault_authentication ? 1 : 0
-  template = file("${path.module}/${var.script_name}.tmpl")
-  vars = {
-    INIT_URL                    = var.INIT_URL
-    DO_URL                      = var.DO_URL
-    AS3_URL                     = var.AS3_URL
-    TS_URL                      = var.TS_URL
-    CFE_URL                     = var.CFE_URL
-    FAST_URL                    = var.FAST_URL,
-    DO_VER                      = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
-    AS3_VER                     = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
-    TS_VER                      = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
-    CFE_VER                     = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
-    FAST_VER                    = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
-    vault_url                   = data.azurerm_key_vault.keyvault[count.index].vault_uri
-    secret_id                   = var.azure_keyvault_secret_name
-    az_key_vault_authentication = var.az_key_vault_authentication
-    bigip_username              = var.f5_username
-    ssh_keypair                 = var.f5_ssh_publickey
-    bigip_password              = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
-  }
-}
 data "template_file" "init_file" {
   template = file("${path.module}/${var.script_name}.tmpl")
   vars = {

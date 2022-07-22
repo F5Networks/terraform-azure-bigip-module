@@ -52,6 +52,13 @@ then
       type: KeyVault
       vaultUrl: ${vault_url}
       secretId: ${secret_id}
+pre_onboard_enabled:
+  - name: provision_rest
+    type: inline
+    commands:
+      - /usr/bin/setdb provision.extramb 500
+      - /usr/bin/setdb restjavad.useextramb true
+      - /usr/bin/setdb setup.run false
 EOF
 
 else
