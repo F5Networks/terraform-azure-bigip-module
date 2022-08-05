@@ -6,6 +6,7 @@
 
 mkdir -p  /var/log/cloud /config/cloud /var/config/rest/downloads
 
+mkdir -p /config/cloud
 
 LOG_FILE=/var/log/cloud/startup-script.log
 [[ ! -f $LOG_FILE ]] && touch $LOG_FILE || { echo "Run Only Once. Exiting"; exit; }
@@ -17,7 +18,9 @@ exec 1>&-
 exec 1>$npipe
 exec 2>&1
 
-mkdir -p /config/cloud
+ Run Immediately Before MCPD
+/usr/bin/setdb provision.extramb 1000
+/usr/bin/setdb restjavad.useextramb true
   
 curl -o /config/cloud/do_w_admin.json -s --fail --retry 60 -m 10 -L https://raw.githubusercontent.com/F5Networks/terraform-azure-bigip-module/main/config/onboard_do.json
 
@@ -52,28 +55,15 @@ then
       type: KeyVault
       vaultUrl: ${vault_url}
       secretId: ${secret_id}
-pre_onboard_enabled:
-  - name: provision_rest
-    type: inline
-    commands:
-      - /usr/bin/setdb provision.extramb 500
-      - /usr/bin/setdb restjavad.useextramb true
-      - /usr/bin/setdb setup.run false
+pre_onboard_enabled: []
 EOF
-
 else
 
    cat << 'EOF' >> /config/cloud/runtime-init-conf.yaml
   - name: ADMIN_PASS
     type: static
     value: ${bigip_password}
-pre_onboard_enabled:
-  - name: provision_rest
-    type: inline
-    commands:
-      - /usr/bin/setdb provision.extramb 500
-      - /usr/bin/setdb restjavad.useextramb true
-      - /usr/bin/setdb setup.run false
+pre_onboard_enabled: []
 EOF
 fi
 

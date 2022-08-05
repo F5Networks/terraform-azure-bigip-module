@@ -51,19 +51,18 @@ output "private_addresses" {
       private_ips = concat(azurerm_network_interface.mgmt_nic.*.private_ip_addresses)
     }
     public_private = {
-      private_ip  = concat(azurerm_network_interface.external_public_nic.*.private_ip_addresses)
+      private_ip  = concat(azurerm_network_interface.external_public_nic.*.private_ip_address)
       private_ips = concat(azurerm_network_interface.external_public_nic.*.private_ip_addresses)
     }
     external_private = {
-      private_ip  = concat(azurerm_network_interface.external_nic.*.private_ip_addresses)
+      private_ip  = concat(azurerm_network_interface.external_nic.*.private_ip_address)
       private_ips = concat(azurerm_network_interface.external_nic.*.private_ip_addresses)
     }
     internal_private = {
       private_ip  = concat(azurerm_network_interface.internal_nic.*.private_ip_address)
-      private_ips = concat(azurerm_network_interface.internal_nic.*.private_ip_address)
+      private_ips = concat(azurerm_network_interface.internal_nic.*.private_ip_addresses)
     }
   }
-  // value       = concat(azurerm_network_interface.external_nic.*.private_ip_addresses, azurerm_network_interface.external_public_nic.*.private_ip_addresses, azurerm_network_interface.internal_nic.*.private_ip_address)
 }
 
 output "bigip_instance_ids" {
