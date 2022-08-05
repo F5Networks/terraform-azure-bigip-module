@@ -69,7 +69,13 @@ variable "internal_securitygroup_ids" {
 variable "f5_instance_type" {
   description = "Specifies the size of the virtual machine."
   type        = string
-  default     = "Standard_DS3_v2"
+  default     = "Standard_D8s_v4"
+}
+
+variable "image_publisher" {
+  description = "Specifies product image publisher"
+  type        = string
+  default     = "f5-networks"
 }
 
 variable "f5_image_name" {

@@ -456,7 +456,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
 
   source_image_reference {
     offer     = var.f5_product_name
-    publisher = "f5-networks"
+    publisher = var.image_publisher
     sku       = var.f5_image_name
     version   = var.f5_version
   }
@@ -476,7 +476,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
   plan {
     name      = var.f5_image_name
     product   = var.f5_product_name
-    publisher = "f5-networks"
+    publisher = var.image_publisher
   }
   zone = var.availability_zone
 
@@ -494,7 +494,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
 
 ## ..:: Run Startup Script ::..
 resource "azurerm_virtual_machine_extension" "vmext" {
-  name                 = "${local.instance_prefix}-vmext1"
+  name                 = format("%s-vmext1", local.instance_prefix)
   depends_on           = [azurerm_linux_virtual_machine.f5vm01]
   virtual_machine_id   = azurerm_linux_virtual_machine.f5vm01.id
   publisher            = "Microsoft.Azure.Extensions"
