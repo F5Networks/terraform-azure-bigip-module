@@ -18,7 +18,7 @@ exec 1>&-
 exec 1>$npipe
 exec 2>&1
 
- Run Immediately Before MCPD
+# Run Immediately Before MCPD
 /usr/bin/setdb provision.extramb 1000
 /usr/bin/setdb restjavad.useextramb true
   
@@ -178,10 +178,10 @@ EOF
 #PACKAGE_URL='https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.1.0/dist/f5-bigip-runtime-init-1.1.0-1.gz.run'
 #PACKAGE_URL='https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.2.0/dist/f5-bigip-runtime-init-1.2.0-1.gz.run'
 for i in {1..30}; do
-    curl -fv --retry 1 --connect-timeout 5 -L ${INIT_URL} -o "/var/config/rest/downloads/f5-bigip-runtime-init-1.1.0-1.gz.run" && break || sleep 10
+    curl -fv --retry 1 --connect-timeout 5 -L ${INIT_URL} -o "/var/config/rest/downloads/f5-bigip-runtime-init.gz.run" && break || sleep 10
 done
 # Install
-bash /var/config/rest/downloads/f5-bigip-runtime-init-1.1.0-1.gz.run -- '--cloud azure'
+bash /var/config/rest/downloads/f5-bigip-runtime-init.gz.run -- '--cloud azure'
 # Run
 f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf.yaml
 sleep 5
