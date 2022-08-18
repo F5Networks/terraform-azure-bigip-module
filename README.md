@@ -284,7 +284,7 @@ These variables have default values and don't have to be set to use this module.
 | libs\_dir | Directory on the BIG-IP to download the A&O Toolchain into | `string` | /config/cloud/azure/node_modules |
 | onboard\_log | Directory on the BIG-IP to store the cloud-init logs | `string` | /var/log/startup-script.log |
 | azure\_secret\_rg | The name of the resource group in which the Azure Key Vault exists | `string` | "" |
-| az\_key\_vault\_authentication | Whether to use key vault to pass authentication | `string` | false |
+| az\_keyvault\_authentication | Whether to use key vault to pass authentication | `string` | false |
 | azure\_keyvault\_name | The name of the Azure Key Vault to use | `string` | "" |
 | azure\_keyvault\_secret\_name | The name of the Azure Key Vault secret containing the password | `string` | "" |
 | external\_subnet\_ids | List of maps of subnetids of the virtual network where the virtual machines will reside | `List of Maps` | [{ "subnet_id" = null, "public_ip" = null,"private_ip_primary" = "", "private_ip_secondary" = "" }] |
