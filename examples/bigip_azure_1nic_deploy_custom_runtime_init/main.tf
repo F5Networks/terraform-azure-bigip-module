@@ -28,15 +28,23 @@ resource "azurerm_ssh_public_key" "f5_key" {
 data "template_file" "user_data_vm0" {
   template = file("custom_onboard_big.tmpl")
   vars = {
-    bigip_username         = "bigipuser"
-    ssh_keypair            = fileexists("~/.ssh/id_rsa.pub") ? file("~/.ssh/id_rsa.pub") : ""
-    aws_secretmanager_auth = false
-    bigip_password         = "xxxx"
-    INIT_URL               = "https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.2.1/dist/f5-bigip-runtime-init-1.2.1-1.gz.run",
-    DO_URL                 = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.21.0/f5-declarative-onboarding-1.21.0-3.noarch.rpm",
-    DO_VER                 = "v1.21.0"
-    AS3_URL                = "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.28.0/f5-appsvcs-3.28.0-3.noarch.rpm",
-    AS3_VER                = "v3.28.0"
+    INIT_URL                   = var.INIT_URL
+    DO_URL                     = var.DO_URL
+    AS3_URL                    = var.AS3_URL
+    TS_URL                     = var.TS_URL
+    CFE_URL                    = var.CFE_URL
+    FAST_URL                   = var.FAST_URL,
+    DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+    AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+    TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+    CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+    FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
+    az_keyvault_authentication = false
+    vault_url                  = ""
+    secret_id                  = ""
+    bigip_username             = "bigipuser"
+    ssh_keypair                = fileexists("~/.ssh/id_rsa.pub") ? file("~/.ssh/id_rsa.pub") : ""
+    bigip_password             = "testAzure@123"
   }
 }
 

@@ -237,7 +237,7 @@ variable "azure_secret_rg" {
   default     = ""
 }
 
-variable "az_key_vault_authentication" {
+variable "az_keyvault_authentication" {
   description = "Whether to use key vault to pass authentication"
   type        = bool
   default     = false

@@ -200,24 +200,24 @@ resource "azurerm_user_assigned_identity" "user_identity" {
 
 data "azurerm_resource_group" "rg_keyvault" {
   name  = var.azure_secret_rg
-  count = var.az_key_vault_authentication ? 1 : 0
+  count = var.az_keyvault_authentication ? 1 : 0
 }
 
 data "azurerm_key_vault" "keyvault" {
-  count               = var.az_key_vault_authentication ? 1 : 0
+  count               = var.az_keyvault_authentication ? 1 : 0
   name                = var.azure_keyvault_name
   resource_group_name = data.azurerm_resource_group.rg_keyvault[count.index].name
 }
 
 data "azurerm_key_vault_secret" "bigip_admin_password" {
-  count        = var.az_key_vault_authentication ? 1 : 0
+  count        = var.az_keyvault_authentication ? 1 : 0
   name         = var.azure_keyvault_secret_name
   key_vault_id = data.azurerm_key_vault.keyvault[count.index].id
 }
 
 
 resource "azurerm_key_vault_access_policy" "example" {
-  count        = var.az_key_vault_authentication ? 1 : 0
+  count        = var.az_keyvault_authentication ? 1 : 0
   key_vault_id = data.azurerm_key_vault.keyvault[count.index].id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.user_identity.principal_id
@@ -245,23 +245,23 @@ resource "random_string" "password" {
 data "template_file" "init_file" {
   template = file("${path.module}/${var.script_name}.tmpl")
   vars = {
-    INIT_URL                    = var.INIT_URL
-    DO_URL                      = var.DO_URL
-    AS3_URL                     = var.AS3_URL
-    TS_URL                      = var.TS_URL
-    CFE_URL                     = var.CFE_URL
-    FAST_URL                    = var.FAST_URL,
-    DO_VER                      = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
-    AS3_VER                     = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
-    TS_VER                      = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
-    CFE_VER                     = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
-    FAST_VER                    = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
-    vault_url                   = var.az_key_vault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
-    secret_id                   = var.az_key_vault_authentication ? var.azure_keyvault_secret_name : ""
-    az_key_vault_authentication = var.az_key_vault_authentication
-    bigip_username              = var.f5_username
-    ssh_keypair                 = var.f5_ssh_publickey
-    bigip_password              = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
+    INIT_URL                   = var.INIT_URL
+    DO_URL                     = var.DO_URL
+    AS3_URL                    = var.AS3_URL
+    TS_URL                     = var.TS_URL
+    CFE_URL                    = var.CFE_URL
+    FAST_URL                   = var.FAST_URL,
+    DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+    AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+    TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+    CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+    FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
+    vault_url                  = var.az_keyvault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
+    secret_id                  = var.az_keyvault_authentication ? var.azure_keyvault_secret_name : ""
+    az_keyvault_authentication = var.az_keyvault_authentication
+    bigip_username             = var.f5_username
+    ssh_keypair                = var.f5_ssh_publickey
+    bigip_password             = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
   }
 }
 
@@ -451,7 +451,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
   disable_password_authentication = var.enable_ssh_key
   computer_name                   = "${local.instance_prefix}-f5vm01"
   admin_username                  = var.f5_username
-  admin_password                  = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
+  admin_password                  = var.az_keyvault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
   custom_data                     = base64encode(coalesce(var.custom_user_data, data.template_file.init_file.rendered))
 
   source_image_reference {
