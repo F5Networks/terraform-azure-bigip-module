@@ -337,10 +337,11 @@ resource "azurerm_network_interface" "mgmt_nic" {
 }
 
 resource "azurerm_network_interface" "external_nic" {
-  count               = length(local.external_private_subnet_id)
-  name                = "${local.instance_prefix}-ext-nic-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  count                = length(local.external_private_subnet_id)
+  name                 = "${local.instance_prefix}-ext-nic-${count.index}"
+  location             = data.azurerm_resource_group.bigiprg.location
+  resource_group_name  = data.azurerm_resource_group.bigiprg.name
+  enable_ip_forwarding = var.external_enable_ip_forwarding
   //enable_accelerated_networking = var.enable_accelerated_networking
 
   ip_configuration {
@@ -364,10 +365,11 @@ resource "azurerm_network_interface" "external_nic" {
 }
 
 resource "azurerm_network_interface" "external_public_nic" {
-  count               = length(local.external_public_subnet_id)
-  name                = "${local.instance_prefix}-ext-nic-public-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  count                = length(local.external_public_subnet_id)
+  name                 = "${local.instance_prefix}-ext-nic-public-${count.index}"
+  location             = data.azurerm_resource_group.bigiprg.location
+  resource_group_name  = data.azurerm_resource_group.bigiprg.name
+  enable_ip_forwarding = var.external_enable_ip_forwarding
   //enable_accelerated_networking = var.enable_accelerated_networking
 
   ip_configuration {

@@ -261,6 +261,10 @@ variable "custom_user_data" {
   default     = null
 }
 
+variable "external_enable_ip_forwarding" {
+  description = "Enable IP forwarding on the External interfaces. To allow inline routing for backends, this must be set to true"
+  default     = true
+}
 variable "tags" {
   description = "key:value tags to apply to resources built by the module"
   type        = map(any)
