@@ -261,6 +261,12 @@ variable "custom_user_data" {
   default     = null
 }
 
+variable "user_identity" {
+  type        = string
+  default     = null
+  description = "The ID of the managed user identity to assign to the BIG-IP instance"
+}
+
 variable "external_enable_ip_forwarding" {
   description = "Enable IP forwarding on the External interfaces. To allow inline routing for backends, this must be set to true"
   default     = true

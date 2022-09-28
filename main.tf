@@ -489,7 +489,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.user_identity.id]
+    identity_ids = var.user_identity == null ? [azurerm_user_assigned_identity.user_identity.id] : [var.user_identity]
   }
   depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security]
 }
