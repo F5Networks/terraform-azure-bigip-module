@@ -287,7 +287,6 @@ resource "azurerm_public_ip" "external_public_ip" {
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   //allocation_method   = var.allocation_method
-  //domain_name_label   = element(var.public_ip_dns, count.index)
   domain_name_label = format("%s-ext-%s", local.instance_prefix, count.index)
   allocation_method = "Static"   # Static is required due to the use of the Standard sku
   sku               = "Standard" # the Standard sku is required due to the use of availability zones
@@ -304,7 +303,6 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   //allocation_method   = var.allocation_method
-  //domain_name_label   = element(var.public_ip_dns, count.index)
   domain_name_label = format("%s-sec-ext-%s", local.instance_prefix, count.index)
   allocation_method = "Static"   # Static is required due to the use of the Standard sku
   sku               = "Standard" # the Standard sku is required due to the use of availability zones
@@ -358,8 +356,9 @@ resource "azurerm_network_interface" "external_nic" {
     private_ip_address_allocation = (length(local.external_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic")
     private_ip_address            = (length(local.external_private_ip_secondary[count.index]) > 0 ? local.external_private_ip_secondary[count.index] : null)
   }
-  tags = merge(local.tags, {
-    Name = format("%s-ext-nic-%s", local.instance_prefix, count.index)
+  tags = merge(local.tags, var.externalnic_failover_tags, {
+    Name = format("%s-ext-nic-%s", local.instance_prefix, count.index),
+
     }
   )
 }
@@ -387,7 +386,7 @@ resource "azurerm_network_interface" "external_public_nic" {
     private_ip_address            = (length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null)
     public_ip_address_id          = azurerm_public_ip.secondary_external_public_ip[count.index].id
   }
-  tags = merge(local.tags, {
+  tags = merge(local.tags, var.externalnic_failover_tags, {
     Name = format("%s-ext-public-nic-%s", local.instance_prefix, count.index)
     }
   )
@@ -407,7 +406,7 @@ resource "azurerm_network_interface" "internal_nic" {
     private_ip_address            = (length(local.internal_private_ip_primary[count.index]) > 0 ? local.internal_private_ip_primary[count.index] : null)
     //public_ip_address_id          = length(azurerm_public_ip.mgmt_public_ip.*.id) > count.index ? azurerm_public_ip.mgmt_public_ip[count.index].id : ""
   }
-  tags = merge(local.tags, {
+  tags = merge(local.tags, var.internalnic_failover_tags, {
     Name = format("%s-internal-nic-%s", local.instance_prefix, count.index)
     }
   )

@@ -295,6 +295,8 @@ These variables have default values and don't have to be set to use this module.
 | user\_identity | The ID of the managed user identity to assign to the BIG-IP instance | `string`  |   null   |
 | external\_enable\_ip\_forwarding | Enable IP forwarding on the External interfaces. To allow inline routing for backends, this must be set to true | `string`  |   `true`   |
 | tags | `key:value` tags to apply to resources built by the module | `map`  |   {}   |
+| externalnic_failover_tags | `key:value` tags to apply to external nic resources built by the module | `map`  |   {}   |
+| internalnic_failover_tags | `key:value` tags to apply to external nic resources built by the module | `map`  |   {}   |
 | sleep_time | The number of seconds/minutes of delay to build into creation of BIG-IP VMs | `string` | 300s |
 
 #### Output Variables
