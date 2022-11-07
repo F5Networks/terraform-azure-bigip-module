@@ -50,8 +50,10 @@ module "bigip" {
 
 module "network" {
   source              = "Azure/vnet/azurerm"
+  version             = "3.0.0"
   vnet_name           = format("%s-vnet-%s", var.prefix, random_id.id.hex)
   resource_group_name = azurerm_resource_group.rg.name
+  vnet_location       = var.location
   address_space       = [var.cidr]
   subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1), cidrsubnet(var.cidr, 8, 2), cidrsubnet(var.cidr, 8, 3), cidrsubnet(var.cidr, 8, 4)]
   subnet_names        = ["mgmt-subnet", "external-public-subnet", "external-public-subnet2", "internal-subnet"]

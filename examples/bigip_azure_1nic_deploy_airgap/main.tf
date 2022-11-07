@@ -61,8 +61,10 @@ resource "null_resource" "clusterDO" {
 
 module "network" {
   source              = "Azure/vnet/azurerm"
+  version             = "3.0.0"
   vnet_name           = format("%s-vnet-%s", var.prefix, random_id.id.hex)
   resource_group_name = azurerm_resource_group.rg.name
+  vnet_location       = var.location
   address_space       = [var.cidr]
   subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1)]
   subnet_names        = ["mgmt-subnet"]
