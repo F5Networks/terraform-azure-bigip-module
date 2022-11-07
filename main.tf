@@ -41,8 +41,6 @@ locals {
     private["private_ip_primary"]
     if private["public_ip"] == true
   ]
-
-
   mgmt_public_index = [
     for index, subnet in local.bigip_map["mgmt_subnet_ids"] :
     index
@@ -56,13 +54,11 @@ locals {
     subnet["subnet_id"]
     if subnet["public_ip"] == false
   ]
-
   mgmt_private_ip_primary = [
     for private in local.bigip_map["mgmt_subnet_ids"] :
     private["private_ip_primary"]
     if private["public_ip"] == false
   ]
-
   mgmt_private_index = [
     for index, subnet in local.bigip_map["mgmt_subnet_ids"] :
     index
@@ -71,25 +67,21 @@ locals {
   mgmt_private_security_id = [
     for i in local.external_private_index : local.bigip_map["mgmt_securitygroup_ids"][i]
   ]
-
   external_public_subnet_id = [
     for subnet in local.bigip_map["external_subnet_ids"] :
     subnet["subnet_id"]
     if subnet["public_ip"] == true
   ]
-
   external_public_private_ip_primary = [
     for private in local.bigip_map["external_subnet_ids"] :
     private["private_ip_primary"]
     if private["public_ip"] == true
   ]
-
   external_public_private_ip_secondary = [
     for private in local.bigip_map["external_subnet_ids"] :
     private["private_ip_secondary"]
     if private["public_ip"] == true
   ]
-
   external_public_index = [
     for index, subnet in local.bigip_map["external_subnet_ids"] :
     index
@@ -103,19 +95,16 @@ locals {
     subnet["subnet_id"]
     if subnet["public_ip"] == false
   ]
-
   external_private_ip_primary = [
     for private in local.bigip_map["external_subnet_ids"] :
     private["private_ip_primary"]
     if private["public_ip"] == false
   ]
-
   external_private_ip_secondary = [
     for private in local.bigip_map["external_subnet_ids"] :
     private["private_ip_secondary"]
     if private["public_ip"] == false
   ]
-
   external_private_index = [
     for index, subnet in local.bigip_map["external_subnet_ids"] :
     index
@@ -129,7 +118,6 @@ locals {
     subnet["subnet_id"]
     if subnet["public_ip"] == true
   ]
-
   internal_public_index = [
     for index, subnet in local.bigip_map["internal_subnet_ids"] :
     index
@@ -143,19 +131,16 @@ locals {
     subnet["subnet_id"]
     if subnet["public_ip"] == false
   ]
-
   internal_private_index = [
     for index, subnet in local.bigip_map["internal_subnet_ids"] :
     index
     if subnet["public_ip"] == false
   ]
-
   internal_private_ip_primary = [
     for private in local.bigip_map["internal_subnet_ids"] :
     private["private_ip_primary"]
     if private["public_ip"] == false
   ]
-
   internal_private_security_id = [
     for i in local.internal_private_index : local.bigip_map["internal_securitygroup_ids"][i]
   ]
@@ -164,6 +149,35 @@ locals {
   selfip_list     = concat(azurerm_network_interface.external_nic.*.private_ip_address, azurerm_network_interface.external_public_nic.*.private_ip_address, azurerm_network_interface.internal_nic.*.private_ip_address)
   instance_prefix = format("%s-%s", var.prefix, random_id.module_id.hex)
   gw_bytes_nic    = local.total_nics > 1 ? element(split("/", local.selfip_list[0]), 0) : ""
+
+  clustermemberDO1 = local.total_nics == 1 ? templatefile("${path.module}/templates/onboard_do_1nic.tpl", {
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    search_domain = "f5.com"
+    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
+  }) : ""
+
+  clustermemberDO2 = local.total_nics == 2 ? templatefile("${path.module}/templates/onboard_do_2nic.tpl", {
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    search_domain = "f5.com"
+    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
+    vlan-name     = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
+    self-ip       = local.selfip_list[0]
+    gateway       = join(".", concat(slice(split(".", local.gw_bytes_nic), 0, 3), [1]))
+  }) : ""
+
+  clustermemberDO3 = local.total_nics >= 3 ? templatefile("${path.module}/templates/onboard_do_3nic.tpl", {
+    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
+    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    search_domain = "f5.com"
+    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
+    vlan-name1    = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
+    self-ip1      = local.selfip_list[0]
+    vlan-name2    = element(split("/", local.vlan_list[1]), length(split("/", local.vlan_list[1])) - 1)
+    self-ip2      = local.selfip_list[1]
+    gateway       = join(".", concat(slice(split(".", local.gw_bytes_nic), 0, 3), [1]))
+  }) : ""
 
   tags = merge(var.tags, {
     Prefix = format("%s", local.instance_prefix)
@@ -240,29 +254,6 @@ resource "random_string" "password" {
   min_lower   = 1
   min_numeric = 1
   special     = false
-}
-
-data "template_file" "init_file" {
-  template = file("${path.module}/${var.script_name}.tmpl")
-  vars = {
-    INIT_URL                   = var.INIT_URL
-    DO_URL                     = var.DO_URL
-    AS3_URL                    = var.AS3_URL
-    TS_URL                     = var.TS_URL
-    CFE_URL                    = var.CFE_URL
-    FAST_URL                   = var.FAST_URL,
-    DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
-    AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
-    TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
-    CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
-    FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
-    vault_url                  = var.az_keyvault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
-    secret_id                  = var.az_keyvault_authentication ? var.azure_keyvault_secret_name : ""
-    az_keyvault_authentication = var.az_keyvault_authentication
-    bigip_username             = var.f5_username
-    ssh_keypair                = var.f5_ssh_publickey
-    bigip_password             = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
-  }
 }
 
 # Create a Public IP for bigip
@@ -453,8 +444,26 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
   computer_name                   = "${local.instance_prefix}-f5vm01"
   admin_username                  = var.f5_username
   admin_password                  = var.az_keyvault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
-  custom_data                     = base64encode(coalesce(var.custom_user_data, data.template_file.init_file.rendered))
-
+  custom_data = base64encode(coalesce(var.custom_user_data, templatefile("${path.module}/templates/${var.script_name}.tmpl",
+    {
+      INIT_URL                   = var.INIT_URL
+      DO_URL                     = var.DO_URL
+      AS3_URL                    = var.AS3_URL
+      TS_URL                     = var.TS_URL
+      CFE_URL                    = var.CFE_URL
+      FAST_URL                   = var.FAST_URL,
+      DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+      AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+      TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+      CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+      FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
+      vault_url                  = var.az_keyvault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
+      secret_id                  = var.az_keyvault_authentication ? var.azure_keyvault_secret_name : ""
+      az_keyvault_authentication = var.az_keyvault_authentication
+      bigip_username             = var.f5_username
+      ssh_keypair                = var.f5_ssh_publickey
+      bigip_password             = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
+  })))
   source_image_reference {
     offer     = var.f5_product_name
     publisher = var.image_publisher
@@ -519,47 +528,3 @@ resource "time_sleep" "wait_for_azurerm_virtual_machine_f5vm" {
 #   resource_group_name = data.azurerm_resource_group.bigiprg.name
 #   depends_on          = [azurerm_virtual_machine.f5vm01, azurerm_virtual_machine_extension.vmext, azurerm_public_ip.mgmt_public_ip[0]]
 # }
-
-
-data "template_file" "clustermemberDO1" {
-  count    = local.total_nics == 1 ? 1 : 0
-  template = file("${path.module}/onboard_do_1nic.tpl")
-  vars = {
-    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
-    search_domain = "f5.com"
-    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
-  }
-}
-
-data "template_file" "clustermemberDO2" {
-  count    = local.total_nics == 2 ? 1 : 0
-  template = file("${path.module}/onboard_do_2nic.tpl")
-  vars = {
-    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
-    search_domain = "f5.com"
-    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
-    vlan-name     = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
-    self-ip       = local.selfip_list[0]
-    gateway       = join(".", concat(slice(split(".", local.gw_bytes_nic), 0, 3), [1]))
-  }
-  depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
-}
-
-data "template_file" "clustermemberDO3" {
-  count    = local.total_nics == 3 ? 1 : 0
-  template = file("${path.module}/onboard_do_3nic.tpl")
-  vars = {
-    hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
-    search_domain = "f5.com"
-    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
-    vlan-name1    = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
-    self-ip1      = local.selfip_list[0]
-    vlan-name2    = element(split("/", local.vlan_list[1]), length(split("/", local.vlan_list[1])) - 1)
-    self-ip2      = local.selfip_list[1]
-    gateway       = join(".", concat(slice(split(".", local.gw_bytes_nic), 0, 3), [1]))
-  }
-  depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
-}

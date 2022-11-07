@@ -25,29 +25,6 @@ resource "azurerm_ssh_public_key" "f5_key" {
   public_key          = file("~/.ssh/id_rsa.pub")
 }
 
-data "template_file" "user_data_vm0" {
-  template = file("custom_onboard_big.tmpl")
-  vars = {
-    INIT_URL                   = var.INIT_URL
-    DO_URL                     = var.DO_URL
-    AS3_URL                    = var.AS3_URL
-    TS_URL                     = var.TS_URL
-    CFE_URL                    = var.CFE_URL
-    FAST_URL                   = var.FAST_URL,
-    DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
-    AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
-    TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
-    CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
-    FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
-    az_keyvault_authentication = false
-    vault_url                  = ""
-    secret_id                  = ""
-    bigip_username             = "bigipuser"
-    ssh_keypair                = fileexists("~/.ssh/id_rsa.pub") ? file("~/.ssh/id_rsa.pub") : ""
-    bigip_password             = "testAzure@123"
-  }
-}
-
 #
 #Create N-nic bigip
 #
@@ -61,7 +38,26 @@ module "bigip" {
   mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
   availability_zone           = var.availability_zone
   availabilityZones_public_ip = var.availabilityZones_public_ip
-  custom_user_data            = data.template_file.user_data_vm0.rendered
+  custom_user_data = templatefile("custom_onboard_big.tmpl",
+    {
+      INIT_URL                   = var.INIT_URL
+      DO_URL                     = var.DO_URL
+      AS3_URL                    = var.AS3_URL
+      TS_URL                     = var.TS_URL
+      CFE_URL                    = var.CFE_URL
+      FAST_URL                   = var.FAST_URL,
+      DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+      AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+      TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+      CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+      FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
+      az_keyvault_authentication = false
+      vault_url                  = ""
+      secret_id                  = ""
+      bigip_username             = "bigipuser"
+      ssh_keypair                = fileexists("~/.ssh/id_rsa.pub") ? file("~/.ssh/id_rsa.pub") : ""
+      bigip_password             = "testAzure@123"
+  })
 }
 
 
@@ -86,8 +82,10 @@ resource "null_resource" "clusterDO" {
 
 module "network" {
   source              = "Azure/vnet/azurerm"
+  version             = "3.0.0"
   vnet_name           = format("%s-vnet-%s", var.prefix, random_id.id.hex)
   resource_group_name = azurerm_resource_group.rg.name
+  vnet_location       = var.location
   address_space       = [var.cidr]
   subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1)]
   subnet_names        = ["mgmt-subnet"]
