@@ -277,6 +277,18 @@ variable "tags" {
   default     = {}
 }
 
+variable "externalnic_failover_tags" {
+  description = "key:value tags to apply to external nic resources built by the module"
+  type        = any
+  default     = {}
+}
+
+variable "internalnic_failover_tags" {
+  description = "key:value tags to apply to internal nic resources built by the module"
+  type        = any
+  default     = {}
+}
+
 variable "sleep_time" {
   type        = string
   default     = "300s"
