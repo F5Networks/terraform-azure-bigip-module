@@ -9,10 +9,6 @@ terraform {
       source  = "hashicorp/random"
       version = ">2.3.0"
     }
-    template = {
-      source  = "hashicorp/template"
-      version = ">2.1.2"
-    }
     null = {
       source  = "hashicorp/null"
       version = ">2.1.2"
@@ -181,9 +177,7 @@ locals {
 
   tags = merge(var.tags, {
     Prefix = format("%s", local.instance_prefix)
-    source = "terraform"
-    }
-  )
+  source = "terraform" })
 }
 
 #
@@ -203,6 +197,7 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azurerm_user_assigned_identity" "user_identity" {
+  count               = var.user_identity == null ? 1 : 0
   name                = format("%s-ident", local.instance_prefix)
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   location            = data.azurerm_resource_group.bigiprg.location
@@ -234,7 +229,7 @@ resource "azurerm_key_vault_access_policy" "example" {
   count        = var.az_keyvault_authentication ? 1 : 0
   key_vault_id = data.azurerm_key_vault.keyvault[count.index].id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_user_assigned_identity.user_identity.principal_id
+  object_id    = var.user_identity == null ? azurerm_user_assigned_identity.user_identity.*.id[0] : var.user_identity
 
   key_permissions = [
     "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore",
@@ -310,8 +305,6 @@ resource "azurerm_network_interface" "mgmt_nic" {
   name                = "${local.instance_prefix}-mgmt-nic-${count.index}"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
-  //enable_accelerated_networking = var.enable_accelerated_networking
-
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
@@ -331,8 +324,6 @@ resource "azurerm_network_interface" "external_nic" {
   location             = data.azurerm_resource_group.bigiprg.location
   resource_group_name  = data.azurerm_resource_group.bigiprg.name
   enable_ip_forwarding = var.external_enable_ip_forwarding
-  //enable_accelerated_networking = var.enable_accelerated_networking
-
   ip_configuration {
     name                          = "${local.instance_prefix}-ext-ip-${count.index}"
     subnet_id                     = local.external_private_subnet_id[count.index]
@@ -349,7 +340,6 @@ resource "azurerm_network_interface" "external_nic" {
   }
   tags = merge(local.tags, var.externalnic_failover_tags, {
     Name = format("%s-ext-nic-%s", local.instance_prefix, count.index),
-
     }
   )
 }
@@ -360,7 +350,6 @@ resource "azurerm_network_interface" "external_public_nic" {
   location             = data.azurerm_resource_group.bigiprg.location
   resource_group_name  = data.azurerm_resource_group.bigiprg.name
   enable_ip_forwarding = var.external_enable_ip_forwarding
-  //enable_accelerated_networking = var.enable_accelerated_networking
 
   ip_configuration {
     name                          = "${local.instance_prefix}-ext-public-ip-${count.index}"
@@ -494,10 +483,9 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
     Name = format("%s-f5vm01", local.instance_prefix)
     }
   )
-
   identity {
     type         = "UserAssigned"
-    identity_ids = var.user_identity == null ? [azurerm_user_assigned_identity.user_identity.id] : [var.user_identity]
+    identity_ids = var.user_identity == null ? flatten([azurerm_user_assigned_identity.user_identity.*.id]) : [var.user_identity]
   }
   depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security]
 }

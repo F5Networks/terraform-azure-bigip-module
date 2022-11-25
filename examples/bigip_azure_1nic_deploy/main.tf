@@ -39,7 +39,6 @@ module "bigip" {
   availabilityZones_public_ip = var.availabilityZones_public_ip
 }
 
-
 resource "null_resource" "clusterDO" {
 
   count = var.instance_count
