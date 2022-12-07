@@ -393,31 +393,44 @@ resource "azurerm_network_interface" "internal_nic" {
 }
 
 resource "azurerm_network_interface_security_group_association" "mgmt_security" {
-  count                = length(local.bigip_map["mgmt_securitygroup_ids"])
-  network_interface_id = azurerm_network_interface.mgmt_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.bigip_map["mgmt_securitygroup_ids"])
+  network_interface_id      = azurerm_network_interface.mgmt_nic[count.index].id
   network_security_group_id = local.bigip_map["mgmt_securitygroup_ids"][count.index]
 }
 
+resource "azurerm_network_interface_application_security_group_association" "mgmt_security" {
+  count                         = length(var.mgmt_app_securitygroup_ids)
+  network_interface_id          = azurerm_network_interface.mgmt_nic[count.index].id
+  application_security_group_id = var.mgmt_app_securitygroup_ids[count.index]
+}
+
 resource "azurerm_network_interface_security_group_association" "external_security" {
-  count                = length(local.external_private_security_id)
-  network_interface_id = azurerm_network_interface.external_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.external_private_security_id)
+  network_interface_id      = azurerm_network_interface.external_nic[count.index].id
   network_security_group_id = local.external_private_security_id[count.index]
 }
 
+resource "azurerm_network_interface_application_security_group_association" "external_security" {
+  count                         = length(var.external_app_securitygroup_ids)
+  network_interface_id          = concat(azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id)[count.index]
+  application_security_group_id = var.external_app_securitygroup_ids[count.index]
+}
+
 resource "azurerm_network_interface_security_group_association" "external_public_security" {
-  count                = length(local.external_public_security_id)
-  network_interface_id = azurerm_network_interface.external_public_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.external_public_security_id)
+  network_interface_id      = azurerm_network_interface.external_public_nic[count.index].id
   network_security_group_id = local.external_public_security_id[count.index]
 }
 
 resource "azurerm_network_interface_security_group_association" "internal_security" {
-  count                = length(local.internal_private_security_id)
-  network_interface_id = azurerm_network_interface.internal_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.internal_private_security_id)
+  network_interface_id      = azurerm_network_interface.internal_nic[count.index].id
   network_security_group_id = local.internal_private_security_id[count.index]
+}
+resource "azurerm_network_interface_application_security_group_association" "internal_security" {
+  count                         = length(var.internal_app_securitygroup_ids)
+  network_interface_id          = azurerm_network_interface.internal_nic[count.index].id
+  application_security_group_id = var.internal_app_securitygroup_ids[count.index]
 }
 
 

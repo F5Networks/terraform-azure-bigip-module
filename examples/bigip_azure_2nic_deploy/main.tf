@@ -29,17 +29,18 @@ resource "azurerm_ssh_public_key" "f5_key" {
 #Create N-nic bigip
 #
 module "bigip" {
-  count                       = var.instance_count
-  source                      = "../../"
-  prefix                      = format("%s-2nic", var.prefix)
-  resource_group_name         = azurerm_resource_group.rg.name
-  f5_ssh_publickey            = azurerm_ssh_public_key.f5_key.public_key
-  mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" = "" }]
-  mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
-  external_subnet_ids         = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true, "private_ip_primary" = "", "private_ip_secondary" = "" }]
-  external_securitygroup_ids  = [module.external-network-security-group-public.network_security_group_id]
-  availability_zone           = var.availability_zone
-  availabilityZones_public_ip = var.availabilityZones_public_ip
+  count                          = var.instance_count
+  source                         = "../../"
+  prefix                         = format("%s-2nic", var.prefix)
+  resource_group_name            = azurerm_resource_group.rg.name
+  f5_ssh_publickey               = azurerm_ssh_public_key.f5_key.public_key
+  mgmt_subnet_ids                = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" = "" }]
+  mgmt_securitygroup_ids         = [module.mgmt-network-security-group.network_security_group_id]
+  external_subnet_ids            = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true, "private_ip_primary" = "", "private_ip_secondary" = "" }]
+  external_securitygroup_ids     = [module.external-network-security-group-public.network_security_group_id]
+  external_app_securitygroup_ids = [azurerm_application_security_group.bigip_asg.id]
+  availability_zone              = var.availability_zone
+  availabilityZones_public_ip    = var.availabilityZones_public_ip
 }
 
 
@@ -111,6 +112,16 @@ module "external-network-security-group-public" {
   source              = "Azure/network-security-group/azurerm"
   resource_group_name = azurerm_resource_group.rg.name
   security_group_name = format("%s-external-public-nsg-%s", var.prefix, random_id.id.hex)
+  tags = {
+    environment = "dev"
+    costcenter  = "terraform"
+  }
+}
+
+resource "azurerm_application_security_group" "bigip_asg" {
+  name                = format("%s-external-asg-%s", var.prefix, random_id.id.hex)
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   tags = {
     environment = "dev"
     costcenter  = "terraform"
