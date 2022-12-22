@@ -272,11 +272,9 @@ resource "azurerm_public_ip" "external_public_ip" {
   name                = "${local.instance_prefix}-pip-ext-${count.index}"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
-  //allocation_method   = var.allocation_method
-  domain_name_label = format("%s-ext-%s", local.instance_prefix, count.index)
-  allocation_method = "Static"   # Static is required due to the use of the Standard sku
-  sku               = "Standard" # the Standard sku is required due to the use of availability zones
-  // availability_zone = var.availabilityZones_public_ip
+  domain_name_label   = format("%s-ext-%s", local.instance_prefix, count.index)
+  allocation_method   = "Static"   # Static is required due to the use of the Standard sku
+  sku                 = "Standard" # the Standard sku is required due to the use of availability zones
   tags = merge(local.tags, {
     Name = format("%s-pip-ext-%s", local.instance_prefix, count.index)
     }
@@ -284,15 +282,13 @@ resource "azurerm_public_ip" "external_public_ip" {
 }
 
 resource "azurerm_public_ip" "secondary_external_public_ip" {
-  count               = length(local.external_public_subnet_id)
+  count               = var.cfe_secondary_vip_disable ? 0 : length(local.external_public_subnet_id)
   name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
-  //allocation_method   = var.allocation_method
-  domain_name_label = format("%s-sec-ext-%s", local.instance_prefix, count.index)
-  allocation_method = "Static"   # Static is required due to the use of the Standard sku
-  sku               = "Standard" # the Standard sku is required due to the use of availability zones
-  // availability_zone = var.availabilityZones_public_ip
+  domain_name_label   = format("%s-sec-ext-%s", local.instance_prefix, count.index)
+  allocation_method   = "Static"   # Static is required due to the use of the Standard sku
+  sku                 = "Standard" # the Standard sku is required due to the use of availability zones
   tags = merge(local.tags, {
     Name = format("%s-secondary-pip-ext-%s", local.instance_prefix, count.index)
     }
