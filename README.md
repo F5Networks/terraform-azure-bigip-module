@@ -297,6 +297,9 @@ These variables have default values and don't have to be set to use this module.
 | tags | `key:value` tags to apply to resources built by the module | `map`  |   {}   |
 | externalnic_failover_tags | `key:value` tags to apply to external nic resources built by the module | `map`  |   {}   |
 | internalnic_failover_tags | `key:value` tags to apply to external nic resources built by the module | `map`  |   {}   |
+| mgmt\_app\_securitygroup\_ids | List of application Security Groupids for Mgmt network | `List` | [] |
+| external\_app\_securitygroup\_ids | List of application Security Groupids for external network | `List` | [] |
+| internal\_app\_securitygroup\_ids | List of application Security Groupids for internal network | `List` | [] |
 | sleep_time | The number of seconds/minutes of delay to build into creation of BIG-IP VMs | `string` | 300s |
 
 #### Output Variables

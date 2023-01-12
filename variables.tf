@@ -66,6 +66,24 @@ variable "internal_securitygroup_ids" {
   default     = []
 }
 
+variable "mgmt_app_securitygroup_ids" {
+  description = "List of network Security Groupids for management network "
+  type        = list(string)
+  default     = []
+}
+
+variable "external_app_securitygroup_ids" {
+  description = "List of network Security Groupids for external network "
+  type        = list(string)
+  default     = []
+}
+
+variable "internal_app_securitygroup_ids" {
+  description = "List of network Security Groupids for internal network "
+  type        = list(string)
+  default     = []
+}
+
 variable "f5_instance_type" {
   description = "Specifies the size of the virtual machine."
   type        = string

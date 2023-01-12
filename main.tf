@@ -35,7 +35,7 @@ locals {
   mgmt_public_private_ip_primary = [
     for private in local.bigip_map["mgmt_subnet_ids"] :
     private["private_ip_primary"]
-    if private["public_ip"] == true
+    if private["public_ip"] == true && private["private_ip_primary"] != ""
   ]
   mgmt_public_index = [
     for index, subnet in local.bigip_map["mgmt_subnet_ids"] :
@@ -53,7 +53,7 @@ locals {
   mgmt_private_ip_primary = [
     for private in local.bigip_map["mgmt_subnet_ids"] :
     private["private_ip_primary"]
-    if private["public_ip"] == false
+    if private["public_ip"] == false && private["private_ip_primary"] != ""
   ]
   mgmt_private_index = [
     for index, subnet in local.bigip_map["mgmt_subnet_ids"] :
@@ -229,7 +229,7 @@ resource "azurerm_key_vault_access_policy" "example" {
   count        = var.az_keyvault_authentication ? 1 : 0
   key_vault_id = data.azurerm_key_vault.keyvault[count.index].id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = var.user_identity == null ? azurerm_user_assigned_identity.user_identity.*.id[0] : var.user_identity
+  object_id    = var.user_identity == null ? azurerm_user_assigned_identity.user_identity.*.id[0].principal_id : var.user_identity
 
   key_permissions = [
     "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore",
@@ -304,8 +304,8 @@ resource "azurerm_network_interface" "mgmt_nic" {
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
-    private_ip_address_allocation = length(local.mgmt_public_private_ip_primary) > 0 ? (length(local.mgmt_public_private_ip_primary[count.index]) > 0 ? "Static" : "Dynamic") : "Dynamic"
-    private_ip_address            = length(local.mgmt_public_private_ip_primary) > 0 ? (length(local.mgmt_public_private_ip_primary[count.index]) > 0 ? local.mgmt_public_private_ip_primary[count.index] : null) : null
+    private_ip_address_allocation = length(local.mgmt_public_private_ip_primary) > 0 ? "static" : (length(local.mgmt_private_ip_primary) > 0 ? "Static" : "Dynamic")
+    private_ip_address            = length(local.mgmt_public_private_ip_primary) > 0 ? local.mgmt_public_private_ip_primary[0] : (length(local.mgmt_private_ip_primary) > 0 ? local.mgmt_private_ip_primary[0] : null)
     public_ip_address_id          = local.bigip_map["mgmt_subnet_ids"][count.index]["public_ip"] ? azurerm_public_ip.mgmt_public_ip[count.index].id : ""
   }
   tags = merge(local.tags, {
@@ -389,31 +389,44 @@ resource "azurerm_network_interface" "internal_nic" {
 }
 
 resource "azurerm_network_interface_security_group_association" "mgmt_security" {
-  count                = length(local.bigip_map["mgmt_securitygroup_ids"])
-  network_interface_id = azurerm_network_interface.mgmt_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.bigip_map["mgmt_securitygroup_ids"])
+  network_interface_id      = azurerm_network_interface.mgmt_nic[count.index].id
   network_security_group_id = local.bigip_map["mgmt_securitygroup_ids"][count.index]
 }
 
+resource "azurerm_network_interface_application_security_group_association" "mgmt_security" {
+  count                         = length(var.mgmt_app_securitygroup_ids)
+  network_interface_id          = azurerm_network_interface.mgmt_nic[count.index].id
+  application_security_group_id = var.mgmt_app_securitygroup_ids[count.index]
+}
+
 resource "azurerm_network_interface_security_group_association" "external_security" {
-  count                = length(local.external_private_security_id)
-  network_interface_id = azurerm_network_interface.external_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.external_private_security_id)
+  network_interface_id      = azurerm_network_interface.external_nic[count.index].id
   network_security_group_id = local.external_private_security_id[count.index]
 }
 
+resource "azurerm_network_interface_application_security_group_association" "external_security" {
+  count                         = length(var.external_app_securitygroup_ids)
+  network_interface_id          = concat(azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id)[count.index]
+  application_security_group_id = var.external_app_securitygroup_ids[count.index]
+}
+
 resource "azurerm_network_interface_security_group_association" "external_public_security" {
-  count                = length(local.external_public_security_id)
-  network_interface_id = azurerm_network_interface.external_public_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.external_public_security_id)
+  network_interface_id      = azurerm_network_interface.external_public_nic[count.index].id
   network_security_group_id = local.external_public_security_id[count.index]
 }
 
 resource "azurerm_network_interface_security_group_association" "internal_security" {
-  count                = length(local.internal_private_security_id)
-  network_interface_id = azurerm_network_interface.internal_nic[count.index].id
-  //network_security_group_id = azurerm_network_security_group.bigip_sg.id
+  count                     = length(local.internal_private_security_id)
+  network_interface_id      = azurerm_network_interface.internal_nic[count.index].id
   network_security_group_id = local.internal_private_security_id[count.index]
+}
+resource "azurerm_network_interface_application_security_group_association" "internal_security" {
+  count                         = length(var.internal_app_securitygroup_ids)
+  network_interface_id          = azurerm_network_interface.internal_nic[count.index].id
+  application_security_group_id = var.internal_app_securitygroup_ids[count.index]
 }
 
 
