@@ -229,7 +229,7 @@ resource "azurerm_key_vault_access_policy" "example" {
   count        = var.az_keyvault_authentication ? 1 : 0
   key_vault_id = data.azurerm_key_vault.keyvault[count.index].id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = var.user_identity == null ? azurerm_user_assigned_identity.user_identity.*.id[0].principal_id : var.user_identity
+  object_id    = var.user_identity == null ? azurerm_user_assigned_identity.user_identity[0].principal_id : var.user_identity
 
   key_permissions = [
     "Get", "List", "Update", "Create", "Import", "Delete", "Recover", "Backup", "Restore",
