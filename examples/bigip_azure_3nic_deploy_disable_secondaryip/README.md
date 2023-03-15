@@ -1,8 +1,10 @@
 # Deploys F5 BIG-IP Azure Cloud
 
-* This Terraform module deploys `1-NIC` BIG-IP in Azure cloud
+* This Terraform module deploys `3-NIC` BIG-IP in Azure cloud
 * Using module `count` feature we can also deploy multiple BIGIP instances(default value of `count` is **1**)
 * Management interface associated with user provided **mgmt_subnet_ids** and **mgmt_securitygroup_ids**
+* External interface associated with user provided **external_subnet_ids** and **external_securitygroup_ids**
+* Internal interface associated with user provided **internal_subnet_ids** and **internal_securitygroup_ids**
 * Random generated `password` for login to BIG-IP (in case of explicit `f5_password` not provided and default value of `az_key_vault_authentication` is false )
 
 ## Example Usage
@@ -11,17 +13,19 @@
 module "bigip" {
   count                       = var.instance_count
   source                      = "F5Networks/bigip-module/azure"
-  prefix                      = format("%s-1nic", var.prefix)
+  prefix                      = format("%s-3nic", var.prefix)
+  vm_name                     = "ecosyshydtestvm01"
   resource_group_name         = azurerm_resource_group.rg.name
   f5_ssh_publickey            = azurerm_ssh_public_key.f5_key.public_key
-  az_key_vault_authentication = var.az_key_vault_authentication
-  azure_secret_rg             = var.az_key_vault_authentication ? azurerm_resource_group.keyvalrg.name : ""
-  azure_keyvault_name         = var.az_key_vault_authentication ? azurerm_key_vault.key_vault.name : ""
-  azure_keyvault_secret_name  = var.az_key_vault_authentication ? azurerm_key_vault_secret.adminsecret.name : ""
-  mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" = "" }]
+  mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" = "10.2.1.5" }]
   mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
+  external_subnet_ids         = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true, "private_ip_primary" = "", "private_ip_secondary" = "" }]
+  external_securitygroup_ids  = [module.external-network-security-group-public.network_security_group_id]
+  internal_subnet_ids         = [{ "subnet_id" = data.azurerm_subnet.internal.id, "public_ip" = false, "private_ip_primary" = "" }]
+  internal_securitygroup_ids  = [module.internal-network-security-group.network_security_group_id]
   availability_zone           = var.availability_zone
   availabilityZones_public_ip = var.availabilityZones_public_ip
+  cfe_secondary_vip_disable   = true
 }
 ```
 
@@ -70,5 +74,5 @@ $terraform destroy
 
 ```shell
 $git clone https://github.com/F5Networks/terraform-azure-bigip-module
-$cd terraform-azure-bigip-module/examples/bigip_azure_1nic_deploy_keyvault
+$cd terraform-azure-bigip-module/examples/bigip_azure_3nic_deploy_disable_secondaryip
 ```
