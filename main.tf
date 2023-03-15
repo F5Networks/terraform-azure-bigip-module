@@ -304,7 +304,7 @@ resource "azurerm_network_interface" "mgmt_nic" {
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
-    private_ip_address_allocation = length(local.mgmt_public_private_ip_primary) > 0 ? "static" : (length(local.mgmt_private_ip_primary) > 0 ? "Static" : "Dynamic")
+    private_ip_address_allocation = length(local.mgmt_public_private_ip_primary) > 0 ? "Static" : (length(local.mgmt_private_ip_primary) > 0 ? "Static" : "Dynamic")
     private_ip_address            = length(local.mgmt_public_private_ip_primary) > 0 ? local.mgmt_public_private_ip_primary[0] : (length(local.mgmt_private_ip_primary) > 0 ? local.mgmt_private_ip_primary[0] : null)
     public_ip_address_id          = local.bigip_map["mgmt_subnet_ids"][count.index]["public_ip"] ? azurerm_public_ip.mgmt_public_ip[count.index].id : ""
   }
@@ -355,12 +355,15 @@ resource "azurerm_network_interface" "external_public_nic" {
     private_ip_address            = (length(local.external_public_private_ip_primary[count.index]) > 0 ? local.external_public_private_ip_primary[count.index] : null)
     public_ip_address_id          = azurerm_public_ip.external_public_ip[count.index].id
   }
-  ip_configuration {
-    name                          = "${local.instance_prefix}-secondary-ext-public-ip-${count.index}"
-    subnet_id                     = local.external_public_subnet_id[count.index]
-    private_ip_address_allocation = (length(local.external_public_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic")
-    private_ip_address            = (length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null)
-    public_ip_address_id          = azurerm_public_ip.secondary_external_public_ip[count.index].id
+  dynamic "ip_configuration" {
+    for_each = var.cfe_secondary_vip_disable ? [] : [0]
+    content {
+      name                          = "${local.instance_prefix}-secondary-ext-public-ip-${count.index}"
+      subnet_id                     = local.external_public_subnet_id[count.index]
+      private_ip_address_allocation = (length(local.external_public_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic")
+      private_ip_address            = (length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null)
+      public_ip_address_id          = azurerm_public_ip.secondary_external_public_ip[count.index].id
+    }
   }
   tags = merge(local.tags, var.externalnic_failover_tags, {
     Name = format("%s-ext-public-nic-%s", local.instance_prefix, count.index)
@@ -433,13 +436,13 @@ resource "azurerm_network_interface_application_security_group_association" "int
 
 # Create F5 BIGIP1
 resource "azurerm_linux_virtual_machine" "f5vm01" {
-  name                            = "${local.instance_prefix}-f5vm01"
+  name                            = var.vm_name == "" ? format("%s-f5vm01", local.instance_prefix) : var.vm_name
   location                        = data.azurerm_resource_group.bigiprg.location
   resource_group_name             = data.azurerm_resource_group.bigiprg.name
   network_interface_ids           = concat(azurerm_network_interface.mgmt_nic.*.id, azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id, azurerm_network_interface.internal_nic.*.id)
   size                            = var.f5_instance_type
   disable_password_authentication = var.enable_ssh_key
-  computer_name                   = "${local.instance_prefix}-f5vm01"
+  computer_name                   = var.vm_name == "" ? format("%s-f5vm01", local.instance_prefix) : var.vm_name
   admin_username                  = var.f5_username
   admin_password                  = var.az_keyvault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
   custom_data = base64encode(coalesce(var.custom_user_data, templatefile("${path.module}/templates/${var.script_name}.tmpl",
