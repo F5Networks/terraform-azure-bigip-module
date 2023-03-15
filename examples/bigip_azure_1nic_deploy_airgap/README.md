@@ -1,41 +1,43 @@
-## Deploys F5 BIG-IP Azure Cloud
+# Deploys F5 BIG-IP Azure Cloud
 
-This Terraform module deploys 1-NIC BIG-IP in Azure and by using module count feature we can also deploy multiple BIGIP instances(default value of count as 1 ) with the following characteristics:
-
-BIG-IP 1 Nic as management interface associated with user provided subnet and security-group
-  
-A random generated password for login to BIG-IP ( Default value of az_key_vault_authentication is false )
-
-
-## Steps to clone and use the provisioner locally
-
-```
-$ git clone https://github.com/f5devcentral/terraform-azure-bigip-module
-$ cd terraform-azure-bigip-module/examples/bigip_azure_1nic_deploy/
-
-```
-
-- Then follow the stated process in Example Usage below
+* This Terraform module deploys `1-NIC` BIG-IP in Azure cloud
+* Using module `count` feature we can also deploy multiple BIGIP instances(default value of `count` is **1**)
+* Management interface associated with user provided **mgmt_subnet_ids** and **mgmt_securitygroup_ids**
+* Random generated `password` for login to BIG-IP (in case of explicit `f5_password` not provided and default value of `az_key_vault_authentication` is false )
 
 ## Example Usage
 
->Modify terraform.tfvars according to the requirement by changing `location` and `AllowedIPs` variables as follows
-
+```hcl
+module "bigip" {
+  count                       = var.instance_count
+  source                      = "F5Networks/bigip-module/azure"
+  prefix                      = format("%s-1nic", var.prefix)
+  resource_group_name         = azurerm_resource_group.rg.name
+  f5_ssh_publickey            = azurerm_ssh_public_key.f5_key.public_key
+  mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = false, "private_ip_primary" = "" }]
+  mgmt_securitygroup_ids      = [module.mgmt-network-security-group.network_security_group_id]
+  availability_zone           = var.availability_zone
+  availabilityZones_public_ip = var.availabilityZones_public_ip
+}
 ```
+
+* Modify `terraform.tfvars` according to the requirement by changing `location` and `AllowedIPs` variables as follows
+
+```hcl
 location = "eastus"
 AllowedIPs = ["0.0.0.0/0"]
 ```
-Next, Run the following commands to create and destroy your configuration
 
+* Next, Run the following commands to `create` and `destroy` your configuration
+
+```shell
+$terraform init
+$terraform plan
+$terraform apply
+$terraform destroy
 ```
-$ terraform init
-$ terraform plan
-$ terraform apply
-$ terraform destroy
 
-```
-
-#### Optional Input Variables
+### Optional Input Variables
 
 | Name | Description | Type | Default |
 |------|-------------|------|---------|
@@ -44,7 +46,7 @@ $ terraform destroy
 | availabilityZones | If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the numbers of the existing Availability Zone you want to use | `List` | [1] |
 | instance_count | Number of Bigip instances to create | `number` | 1 |
 
-#### Output Variables
+### Output Variables
 
 | Name | Description |
 |------|-------------|
@@ -58,6 +60,12 @@ $ terraform destroy
 | public_addresses | List of BIG-IP public addresses |
 | private_addresses | List of BIG-IP private addresses |
 
-```
-NOTE: A local json file will get generated which contains the DO declaration
+~> **NOTE**A local json file will get generated which contains the DO declaration
+
+### Steps to clone and use the module locally
+
+```shell
+$git clone https://github.com/F5Networks/terraform-azure-bigip-module
+$cd terraform-azure-bigip-module/examples/bigip_azure_1nic_deploy_airgap/
+
 ```
