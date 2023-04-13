@@ -306,7 +306,7 @@ resource "azurerm_network_interface" "mgmt_nic" {
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
     private_ip_address_allocation = length(local.mgmt_public_private_ip_primary) > 0 ? "Static" : (length(local.mgmt_private_ip_primary) > 0 ? "Static" : "Dynamic")
     private_ip_address            = length(local.mgmt_public_private_ip_primary) > 0 ? local.mgmt_public_private_ip_primary[0] : (length(local.mgmt_private_ip_primary) > 0 ? local.mgmt_private_ip_primary[0] : null)
-    public_ip_address_id          = local.bigip_map["mgmt_subnet_ids"][count.index]["public_ip"] ? azurerm_public_ip.mgmt_public_ip[count.index].id : ""
+    public_ip_address_id          = local.bigip_map["mgmt_subnet_ids"][count.index]["public_ip"] ? azurerm_public_ip.mgmt_public_ip[count.index].id : null
   }
   tags = merge(local.tags, {
     Name = format("%s-mgmt-nic-%s", local.instance_prefix, count.index)
