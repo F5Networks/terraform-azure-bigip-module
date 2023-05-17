@@ -510,7 +510,13 @@ resource "azurerm_virtual_machine_extension" "vmext" {
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
-  settings             = <<SETTINGS
+
+  tags = merge(local.tags, {
+    Name = format("%s-vmext1", local.instance_prefix)
+    }
+  )
+
+  settings = <<SETTINGS
     {
       "commandToExecute": "bash /var/lib/waagent/CustomData; exit 0;"
     }
