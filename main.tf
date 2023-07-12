@@ -436,6 +436,12 @@ resource "azurerm_network_interface_application_security_group_association" "int
 
 # Create F5 BIGIP1
 resource "azurerm_linux_virtual_machine" "f5vm01" {
+  lifecycle {
+    ignore_changes = [
+      admin_password,
+      custom_data
+    ]
+  }
   name                            = var.vm_name == "" ? format("%s-f5vm01", local.instance_prefix) : var.vm_name
   location                        = var.location
   resource_group_name             = var.resource_group_name
