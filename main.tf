@@ -187,10 +187,6 @@ resource "random_id" "module_id" {
   byte_length = 2
 }
 
-data "azurerm_resource_group" "bigiprg" {
-  name = var.resource_group_name
-}
-
 data "azurerm_subscription" "current" {
 }
 data "azurerm_client_config" "current" {
