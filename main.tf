@@ -474,7 +474,7 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
 
   os_disk {
     caching                   = "ReadWrite"
-    disk_size_gb              = 84
+    disk_size_gb              = var.os_disk_size
     name                      = "${local.instance_prefix}-osdisk-f5vm01"
     storage_account_type      = var.storage_account_type
     write_accelerator_enabled = false

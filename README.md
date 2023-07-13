@@ -1,5 +1,3 @@
-~> **WARNING** Due to F5 vulnerabilities listed in [K97843387](https://support.f5.com/csp/article/K97843387), **DO NOT USE** Module unless using **f5_image_name** input parameter. Updated images are pending publication to Marketplace.Please see [K97843387](https://support.f5.com/csp/article/K97843387) and Cloud Provider for latest updates.
-
 # Deploys BIG-IP in Azure Cloud
 
 This Terraform module deploys N-nic F5 BIG-IP in Azure cloud,and with module count feature we can also deploy multiple instances of BIG-IP.
@@ -28,9 +26,9 @@ This module is supported in the following bigip and terraform version
 
 | BIGIP version | Terraform 1.X  | Terraform 0.14 |
 |---------------|----------------|----------------|
+| BIG-IP 17.x   |       X        |      X         |
 | BIG-IP 16.x   |       X        |      X         |
 | BIG-IP 15.x   |       X        |      X         |
-| BIG-IP 14.x   |       X        |      X         |
 
 ## Password Management
 
@@ -270,6 +268,7 @@ These variables have default values and don't have to be set to use this module.
 | vm\_name | Name of F5 BIGIP VM to be used, it should be unique value,default is `empty string` meaning module adds with `prefix + random_id` | `string` | "" |
 | f5\_image\_name | 5 SKU (image) to you want to deploy. Note: The disk size of the VM will be determined based on the option you select. Important: If intending to provision multiple modules, ensure the appropriate value is selected, such as AllTwoBootLocations or AllOneBootLocation | `string` | f5-bigip-virtual-edition-200m-best-hourly |
 | f5\_version | It is set to default to use the latest software | `string` | latest |
+| os\_disk\_size | The size of the Data Disk which should be created, size is in `GB` | `number` | `84` |
 | f5\_product\_name | Azure BIG-IP VE Offer | `string` | f5-big-ip-best |
 | image\_publisher | Specifies product image publisher | `string`  |  `f5-networks` |
 | storage\_account\_type | Defines the type of storage account to be created. Valid options are Standard\_LRS, Standard\_ZRS, Standard\_GRS, Standard\_RAGRS, Premium\_LRS | `string` | Standard\_LRS |

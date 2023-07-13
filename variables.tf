@@ -96,6 +96,12 @@ variable "f5_instance_type" {
   default     = "Standard_D8s_v4"
 }
 
+variable "os_disk_size" {
+  description = "The size of the Data Disk which should be created"
+  type        = number
+  default     = 84
+}
+
 variable "image_publisher" {
   description = "Specifies product image publisher"
   type        = string
