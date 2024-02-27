@@ -66,3 +66,13 @@ output "private_addresses" {
 output "bigip_instance_ids" {
   value = concat(azurerm_linux_virtual_machine.f5vm01.*.id)[0]
 }
+
+output "bigip_nic_ids" {
+  description = "List of BIG-IP network interface IDs"
+  value = {
+    mgmt_nics     = azurerm_network_interface.mgmt_nic.*.id
+    public_nics   = azurerm_network_interface.external_public_nic.*.id
+    external_nics = azurerm_network_interface.external_nic.*.id
+    internal_nics = azurerm_network_interface.internal_nic.*.id
+  }
+}
