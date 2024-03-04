@@ -187,10 +187,6 @@ resource "random_id" "module_id" {
   byte_length = 2
 }
 
-data "azurerm_resource_group" "bigiprg" {
-  name = var.resource_group_name
-}
-
 data "azurerm_subscription" "current" {
 }
 data "azurerm_client_config" "current" {
@@ -199,8 +195,8 @@ data "azurerm_client_config" "current" {
 resource "azurerm_user_assigned_identity" "user_identity" {
   count               = var.user_identity == null ? 1 : 0
   name                = format("%s-ident", local.instance_prefix)
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  location            = data.azurerm_resource_group.bigiprg.location
+  resource_group_name = var.resource_group_name
+  location            = var.location
   tags = merge(local.tags, {
     Name = format("%s-ident", local.instance_prefix)
     }
@@ -255,8 +251,8 @@ resource "random_string" "password" {
 resource "azurerm_public_ip" "mgmt_public_ip" {
   count               = length(local.mgmt_public_subnet_id)
   name                = "${local.instance_prefix}-pip-mgmt-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   domain_name_label   = format("%s-mgmt-%s", local.instance_prefix, count.index)
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   sku                 = "Standard" # the Standard sku is required due to the use of availability zones
@@ -270,8 +266,8 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
 resource "azurerm_public_ip" "external_public_ip" {
   count               = length(local.external_public_subnet_id)
   name                = "${local.instance_prefix}-pip-ext-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   domain_name_label   = format("%s-ext-%s", local.instance_prefix, count.index)
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   sku                 = "Standard" # the Standard sku is required due to the use of availability zones
@@ -284,8 +280,8 @@ resource "azurerm_public_ip" "external_public_ip" {
 resource "azurerm_public_ip" "secondary_external_public_ip" {
   count               = var.cfe_secondary_vip_disable ? 0 : length(local.external_public_subnet_id)
   name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   domain_name_label   = format("%s-sec-ext-%s", local.instance_prefix, count.index)
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   sku                 = "Standard" # the Standard sku is required due to the use of availability zones
@@ -299,8 +295,8 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
 resource "azurerm_network_interface" "mgmt_nic" {
   count               = length(local.bigip_map["mgmt_subnet_ids"])
   name                = "${local.instance_prefix}-mgmt-nic-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
@@ -317,8 +313,8 @@ resource "azurerm_network_interface" "mgmt_nic" {
 resource "azurerm_network_interface" "external_nic" {
   count                = length(local.external_private_subnet_id)
   name                 = "${local.instance_prefix}-ext-nic-${count.index}"
-  location             = data.azurerm_resource_group.bigiprg.location
-  resource_group_name  = data.azurerm_resource_group.bigiprg.name
+  location             = var.location
+  resource_group_name  = var.resource_group_name
   enable_ip_forwarding = var.external_enable_ip_forwarding
   ip_configuration {
     name                          = "${local.instance_prefix}-ext-ip-${count.index}"
@@ -343,8 +339,8 @@ resource "azurerm_network_interface" "external_nic" {
 resource "azurerm_network_interface" "external_public_nic" {
   count                = length(local.external_public_subnet_id)
   name                 = "${local.instance_prefix}-ext-nic-public-${count.index}"
-  location             = data.azurerm_resource_group.bigiprg.location
-  resource_group_name  = data.azurerm_resource_group.bigiprg.name
+  location             = var.location
+  resource_group_name  = var.resource_group_name
   enable_ip_forwarding = var.external_enable_ip_forwarding
 
   ip_configuration {
@@ -374,8 +370,8 @@ resource "azurerm_network_interface" "external_public_nic" {
 resource "azurerm_network_interface" "internal_nic" {
   count               = length(local.internal_private_subnet_id)
   name                = "${local.instance_prefix}-int-nic${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
   //enable_accelerated_networking = var.enable_accelerated_networking
 
   ip_configuration {
@@ -436,9 +432,15 @@ resource "azurerm_network_interface_application_security_group_association" "int
 
 # Create F5 BIGIP1
 resource "azurerm_linux_virtual_machine" "f5vm01" {
+  lifecycle {
+    ignore_changes = [
+      admin_password,
+      custom_data
+    ]
+  }
   name                            = var.vm_name == "" ? format("%s-f5vm01", local.instance_prefix) : var.vm_name
-  location                        = data.azurerm_resource_group.bigiprg.location
-  resource_group_name             = data.azurerm_resource_group.bigiprg.name
+  location                        = var.location
+  resource_group_name             = var.resource_group_name
   network_interface_ids           = concat(azurerm_network_interface.mgmt_nic.*.id, azurerm_network_interface.external_nic.*.id, azurerm_network_interface.external_public_nic.*.id, azurerm_network_interface.internal_nic.*.id)
   size                            = var.f5_instance_type
   disable_password_authentication = var.enable_ssh_key
@@ -531,6 +533,6 @@ resource "time_sleep" "wait_for_azurerm_virtual_machine_f5vm" {
 # Getting Public IP Assigned to BIGIP
 # data "azurerm_public_ip" "f5vm01mgmtpip" {
 #   name                = azurerm_public_ip.mgmt_public_ip[0].name
-#   resource_group_name = data.azurerm_resource_group.bigiprg.name
+#   resource_group_name = var.resource_group_name
 #   depends_on          = [azurerm_virtual_machine.f5vm01, azurerm_virtual_machine_extension.vmext, azurerm_public_ip.mgmt_public_ip[0]]
 # }
