@@ -38,4 +38,7 @@ output "private_addresses" {
 output "bigip_instance_ids" {
   value = module.bigip.*.bigip_instance_ids
 }
+output "bigip_nic_ids" {
+  value = module.bigip.*.bigip_nic_ids
+}
 

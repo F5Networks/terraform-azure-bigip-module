@@ -35,3 +35,6 @@ output "private_addresses" {
   value = module.bigip.*.private_addresses
 }
 
+output "bigip_nic_ids" {
+  value = module.bigip.*.bigip_nic_ids
+}
