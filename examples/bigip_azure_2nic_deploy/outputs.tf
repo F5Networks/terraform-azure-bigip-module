@@ -43,3 +43,7 @@ output "external_public_primary_private_ip" {
   description = "List of external_public_primary_private_ip"
   value       = flatten([for i in range(length(module.bigip.*.private_addresses)) : module.bigip.*.private_addresses[i]["public_private"]["private_ip"]])
 }
+
+output "bigip_nic_ids" {
+  value = module.bigip.*.bigip_nic_ids
+}

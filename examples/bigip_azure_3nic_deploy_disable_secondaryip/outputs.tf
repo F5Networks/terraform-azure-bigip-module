@@ -34,3 +34,8 @@ output "public_addresses" {
 output "private_addresses" {
   value = module.bigip.*.private_addresses
 }
+
+output "bigip_nic_ids" {
+  description = "List of BIG-IP network interface IDs"
+  value = module.bigip.*.bigip_nic_ids
+}
