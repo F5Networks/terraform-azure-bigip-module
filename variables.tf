@@ -198,14 +198,14 @@ variable "script_name" {
 variable "DO_URL" {
   description = "URL to download the BIG-IP Declarative Onboarding module"
   type        = string
-  default     = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.43.0/f5-declarative-onboarding-1.43.0-5.noarch.rpm"
+  default     = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.44.0/f5-declarative-onboarding-1.44.0-5.noarch.rpm"
 }
 ## Please check and update the latest AS3 URL from https://github.com/F5Networks/f5-appsvcs-extension/releases/latest 
 # always point to a specific version in order to avoid inadvertent configuration inconsistency
 variable "AS3_URL" {
   description = "URL to download the BIG-IP Application Service Extension 3 (AS3) module"
   type        = string
-  default     = "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.50.1/f5-appsvcs-3.50.1-2.noarch.rpm"
+  default     = "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.51.0/f5-appsvcs-3.51.0-5.noarch.rpm"
 }
 
 ## Please check and update the latest TS URL from https://github.com/F5Networks/f5-telemetry-streaming/releases/latest 
@@ -229,7 +229,7 @@ variable "FAST_URL" {
 variable "CFE_URL" {
   description = "URL to download the BIG-IP Cloud Failover Extension module"
   type        = string
-  default     = "https://github.com/F5Networks/f5-cloud-failover-extension/releases/download/v2.0.2/f5-cloud-failover-2.0.2-2.noarch.rpm"
+  default     = "https://github.com/F5Networks/f5-cloud-failover-extension/releases/download/v2.1.1/f5-cloud-failover-2.1.1-1.noarch.rpm"
 }
 
 ## Please check and update the latest runtime init URL from https://github.com/F5Networks/f5-bigip-runtime-init/releases/latest
@@ -237,7 +237,7 @@ variable "CFE_URL" {
 variable "INIT_URL" {
   description = "URL to download the BIG-IP runtime init"
   type        = string
-  default     = "https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v2.0.1/dist/f5-bigip-runtime-init-2.0.1-1.gz.run"
+  default     = "https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v2.0.2/dist/f5-bigip-runtime-init-2.0.2-1.gz.run"
 }
 
 variable "libs_dir" {
