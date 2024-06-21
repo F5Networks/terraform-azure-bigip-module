@@ -30,17 +30,14 @@ func TestTerraformAzure3NicExample(t *testing.T) {
 	assert.NotEqual(t, "", mgmtPublicIP[0])
 	assert.NotEqual(t, "", bigipPassword[0])
 	assert.NotEqual(t, "", bigipUsername[0])
-	// assert.Equal(t, 443, mgmtPort[0])
-	assert.Equal(t, "443", fmt.Sprintf("%d", mgmtPort[0]))
+	assert.Equal(t, 443, mgmtPort[0])
+	// assert.Equal(t, "443", fmt.Sprintf("%d", mgmtPort[0]))
 	assert.NotEqual(t, "", mgmtPublicURL[0])
 
 	logger.Logf(t, "mgmtPublicURL:%+v", mgmtPublicURL)
 	// logger.Logf(t, "bigipPassword:%+v",bigipPassword)
-
-	testUrl := fmt.Sprintf("https://%s:%s@%s:%s/mgmt/shared/appsvcs/info", bigipUsername, bigipPassword, mgmtPublicIP, mgmtPort)
-
+	testUrl := fmt.Sprintf("https://%s:%s@%s:%d/mgmt/shared/appsvcs/info", bigipUsername[0], bigipPassword[0], mgmtPublicIP[0], mgmtPort[0])
 	logger.Logf(t, "testUrl:%+v", testUrl)
-
 	// fmt.Sprintf("https://%s:%s@%s:%s/mgmt/shared/appsvcs/info", string([]byte{bigipUsername[0]}), string([]byte{bigipPassword[0]}), string([]byte{mgmtPublicIP[0]}), string([]byte{mgmtPort[0]})),
 
 	// Setup a TLS configuration to submit with the helper, a blank struct is acceptable
