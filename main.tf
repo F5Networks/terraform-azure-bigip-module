@@ -260,7 +260,7 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
   domain_name_label   = format("%s-mgmt-%s", local.instance_prefix, count.index)
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   sku                 = "Standard" # the Standard sku is required due to the use of availability zones
-  // availability_zone   = var.availabilityZones_public_ip
+  # availability_zone   = var.availabilityZones_public_ip
   tags = merge(local.tags, {
     Name = format("%s-pip-mgmt-%s", local.instance_prefix, count.index)
     }
@@ -297,10 +297,11 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
 
 # Deploy BIG-IP with N-Nic interface 
 resource "azurerm_network_interface" "mgmt_nic" {
-  count               = length(local.bigip_map["mgmt_subnet_ids"])
-  name                = "${local.instance_prefix}-mgmt-nic-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  count                = length(local.bigip_map["mgmt_subnet_ids"])
+  name                 = "${local.instance_prefix}-mgmt-nic-${count.index}"
+  location             = data.azurerm_resource_group.bigiprg.location
+  resource_group_name  = data.azurerm_resource_group.bigiprg.name
+  enable_ip_forwarding = var.mgmt_enable_ip_forwarding
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
