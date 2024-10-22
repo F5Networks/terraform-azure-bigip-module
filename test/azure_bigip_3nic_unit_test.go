@@ -36,7 +36,9 @@ func TestTerraformAzure3NicExample(t *testing.T) {
 
 	logger.Logf(t, "mgmtPublicURL:%+v", mgmtPublicURL)
 	// logger.Logf(t, "bigipPassword:%+v",bigipPassword)
-	testUrl := fmt.Sprintf("https://%s:%s@%s:%d/mgmt/shared/appsvcs/info", bigipUsername[0], bigipPassword[0], mgmtPublicIP[0], mgmtPort[0])
+	testUrl := fmt.Sprintf("https://%s:%s@%s:%d/mgmt/shared/appsvcs/info", string(bigipUsername[0]), string(bigipPassword[0]), string(mgmtPublicIP[0]), int(mgmtPort[0]))
+
+	// testUrl := fmt.Sprintf("https://%s:%s@%s:%d/mgmt/shared/appsvcs/info", bigipUsername[0], bigipPassword[0], mgmtPublicIP[0], mgmtPort[0])
 	logger.Logf(t, "testUrl:%+v", testUrl)
 	// fmt.Sprintf("https://%s:%s@%s:%s/mgmt/shared/appsvcs/info", string([]byte{bigipUsername[0]}), string([]byte{bigipPassword[0]}), string([]byte{mgmtPublicIP[0]}), string([]byte{mgmtPort[0]})),
 
