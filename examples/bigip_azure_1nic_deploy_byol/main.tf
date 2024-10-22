@@ -39,6 +39,7 @@ module "bigip" {
   f5_product_name             = "f5-big-ip-byol"
   f5_image_name               = "f5-big-all-2slot-byol"
   f5_version                  = "17.1.103000"
+  mgmt_enable_ip_forwarding   = true
   resource_group_name         = azurerm_resource_group.rg.name
   f5_ssh_publickey            = azurerm_ssh_public_key.f5_key.public_key
   mgmt_subnet_ids             = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" = "" }]
