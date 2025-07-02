@@ -93,13 +93,13 @@ variable "internal_app_securitygroup_ids" {
 variable "f5_instance_type" {
   description = "Specifies the size of the virtual machine."
   type        = string
-  default     = "Standard_D8s_v4"
+  default     = "Standard_DS12_v2"
 }
 
 variable "os_disk_size" {
   description = "The size of the Data Disk which should be created"
   type        = number
-  default     = 84
+  default     = 120
 }
 
 variable "image_publisher" {

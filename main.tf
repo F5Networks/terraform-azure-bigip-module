@@ -446,26 +446,26 @@ resource "azurerm_linux_virtual_machine" "f5vm01" {
   computer_name                   = var.vm_name == "" ? format("%s-f5vm01", local.instance_prefix) : var.vm_name
   admin_username                  = var.f5_username
   admin_password                  = var.az_keyvault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
-  custom_data = base64encode(coalesce(var.custom_user_data, templatefile("${path.module}/templates/${var.script_name}.tmpl",
-    {
-      INIT_URL                   = var.INIT_URL
-      DO_URL                     = var.DO_URL
-      AS3_URL                    = var.AS3_URL
-      TS_URL                     = var.TS_URL
-      CFE_URL                    = var.CFE_URL
-      FAST_URL                   = var.FAST_URL,
-      DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
-      AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
-      TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
-      CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
-      FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
-      vault_url                  = var.az_keyvault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
-      secret_id                  = var.az_keyvault_authentication ? var.azure_keyvault_secret_name : ""
-      az_keyvault_authentication = var.az_keyvault_authentication
-      bigip_username             = var.f5_username
-      ssh_keypair                = var.f5_ssh_publickey
-      bigip_password             = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
-  })))
+  # custom_data = base64encode(coalesce(var.custom_user_data, templatefile("${path.module}/templates/${var.script_name}.tmpl",
+  #   {
+  #     INIT_URL                   = var.INIT_URL
+  #     DO_URL                     = var.DO_URL
+  #     AS3_URL                    = var.AS3_URL
+  #     TS_URL                     = var.TS_URL
+  #     CFE_URL                    = var.CFE_URL
+  #     FAST_URL                   = var.FAST_URL,
+  #     DO_VER                     = format("v%s", split("-", split("/", var.DO_URL)[length(split("/", var.DO_URL)) - 1])[3])
+  #     AS3_VER                    = format("v%s", split("-", split("/", var.AS3_URL)[length(split("/", var.AS3_URL)) - 1])[2])
+  #     TS_VER                     = format("v%s", split("-", split("/", var.TS_URL)[length(split("/", var.TS_URL)) - 1])[2])
+  #     CFE_VER                    = format("v%s", split("-", split("/", var.CFE_URL)[length(split("/", var.CFE_URL)) - 1])[3])
+  #     FAST_VER                   = format("v%s", split("-", split("/", var.FAST_URL)[length(split("/", var.FAST_URL)) - 1])[3])
+  #     vault_url                  = var.az_keyvault_authentication ? data.azurerm_key_vault.keyvault[0].vault_uri : ""
+  #     secret_id                  = var.az_keyvault_authentication ? var.azure_keyvault_secret_name : ""
+  #     az_keyvault_authentication = var.az_keyvault_authentication
+  #     bigip_username             = var.f5_username
+  #     ssh_keypair                = var.f5_ssh_publickey
+  #     bigip_password             = (length(var.f5_password) > 0 ? var.f5_password : random_string.password.result)
+  # })))
   source_image_reference {
     offer     = var.f5_product_name
     publisher = var.image_publisher
@@ -510,7 +510,7 @@ resource "azurerm_virtual_machine_extension" "vmext" {
   virtual_machine_id   = azurerm_linux_virtual_machine.f5vm01.id
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
-  type_handler_version = "2.0"
+  type_handler_version = "2.1.13.0"
 
   tags = merge(local.tags, {
     Name = format("%s-vmext1", local.instance_prefix)
