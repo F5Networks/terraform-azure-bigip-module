@@ -99,7 +99,7 @@ variable "f5_instance_type" {
 variable "os_disk_size" {
   description = "The size of the Data Disk which should be created"
   type        = number
-  default     = 84
+  default     = 85
 }
 
 variable "image_publisher" {
@@ -107,9 +107,10 @@ variable "image_publisher" {
   type        = string
   default     = "f5-networks"
 }
+
 variable "f5_image_name" {
   type        = string
-  default     = "f5-big-best-plus-hourly-25mbps"
+  default     = "f5-bigip-virtual-edition-25m-better-hourly"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
@@ -148,7 +149,7 @@ EOD
 
 variable "f5_product_name" {
   type        = string
-  default     = "f5-big-ip-best"
+  default     = "f5-big-ip-better"
   description = <<-EOD
 After finding the image to use with the Azure CLI with a variant of the following;
 
