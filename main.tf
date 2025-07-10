@@ -301,7 +301,7 @@ resource "azurerm_network_interface" "mgmt_nic" {
   name                 = "${local.instance_prefix}-mgmt-nic-${count.index}"
   location             = data.azurerm_resource_group.bigiprg.location
   resource_group_name  = data.azurerm_resource_group.bigiprg.name
-  enable_ip_forwarding = var.mgmt_enable_ip_forwarding
+  ip_forwarding_enabled = var.mgmt_enable_ip_forwarding
   ip_configuration {
     name                          = "${local.instance_prefix}-mgmt-ip-${count.index}"
     subnet_id                     = local.bigip_map["mgmt_subnet_ids"][count.index]["subnet_id"]
@@ -320,7 +320,7 @@ resource "azurerm_network_interface" "external_nic" {
   name                 = "${local.instance_prefix}-ext-nic-${count.index}"
   location             = data.azurerm_resource_group.bigiprg.location
   resource_group_name  = data.azurerm_resource_group.bigiprg.name
-  enable_ip_forwarding = var.external_enable_ip_forwarding
+  ip_forwarding_enabled = var.external_enable_ip_forwarding
   ip_configuration {
     name                          = "${local.instance_prefix}-ext-ip-${count.index}"
     subnet_id                     = local.external_private_subnet_id[count.index]
@@ -346,7 +346,7 @@ resource "azurerm_network_interface" "external_public_nic" {
   name                 = "${local.instance_prefix}-ext-nic-public-${count.index}"
   location             = data.azurerm_resource_group.bigiprg.location
   resource_group_name  = data.azurerm_resource_group.bigiprg.name
-  enable_ip_forwarding = var.external_enable_ip_forwarding
+  ip_forwarding_enabled = var.external_enable_ip_forwarding
 
   ip_configuration {
     name                          = "${local.instance_prefix}-ext-public-ip-${count.index}"
