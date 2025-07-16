@@ -148,14 +148,14 @@ locals {
 
   clustermemberDO1 = local.total_nics == 1 ? templatefile("${path.module}/templates/onboard_do_1nic.tpl", {
     hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
   }) : ""
 
   clustermemberDO2 = local.total_nics == 2 ? templatefile("${path.module}/templates/onboard_do_2nic.tpl", {
     hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
     vlan-name     = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
@@ -165,7 +165,7 @@ locals {
 
   clustermemberDO3 = local.total_nics >= 3 ? templatefile("${path.module}/templates/onboard_do_3nic.tpl", {
     hostname      = length(local.mgmt_public_subnet_id) > 0 ? azurerm_public_ip.mgmt_public_ip[0].fqdn : azurerm_network_interface.mgmt_nic[0].private_ip_address
-    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
+    name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
     vlan-name1    = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
